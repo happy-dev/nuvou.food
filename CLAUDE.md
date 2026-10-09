@@ -9,7 +9,7 @@ The site has 3 pages: **Home, Shop (with product pages), About us**. It's biling
 - **Record each decision** in the Decisions section below, in the same commit as the code it affects. Keep this file true: if the code and this file disagree, fix one of them.
 - **Claude drafts first** (copy, layouts, product content), then we iterate.
 - **Ask for accounts and services just in time**, when the step that needs them starts.
-- **Git workflow:** `main` always works, and once the site is hosted, merging into `main` deploys it. Every change goes on a short-lived branch (`feat/…`, `fix/…`, `docs/…`, `phase-N/…`), then into a pull request on GitHub. Alex reviews and merges it. Never commit directly to `main`.
+- **Git workflow:** `main` always works, and once the site is hosted, merging into `main` deploys it. **Real chunks of work** (a phase, a page, checkout…) go on a short-lived branch (`feat/…`, `fix/…`, `phase-N/…`), then into a GitHub pull request with an explanation. Alex reviews it and squash-merges it. **Small changes** (docs, decisions, minor fixes): show Alex the diff in the conversation, and commit directly to `main` once Alex approves.
 - **Documentation is this file plus a short `README.md`.** Don't add other documentation files.
 - **`inputs/` is private and git-ignored:** raw logos, photos, recipe sheets, notes, and the working plan (`inputs/notes/PLAN.md`). Read from it, never commit it, and don't copy private details (such as phone numbers) into versioned files.
 
@@ -67,7 +67,7 @@ The site has 3 pages: **Home, Shop (with product pages), About us**. It's biling
 | 2026-10-09 | Anti-spam layers: Cloudflare Turnstile on every form that sends an email (production request, sign-in link), plus a honeypot field and minimum fill time, rate limits stored in Postgres (per email, per IP, and on checkout), strict server-side validation, and Stripe Radar. If spam slips through, unverified-request notifications switch to a daily summary | Bots could otherwise use our forms to send emails to strangers, which hurts the nuvou.food sending reputation, uses up Resend's quota and floods Alex's inbox. All layers are free |
 | 2026-10-09 | Analytics: Umami (cookie-less) + Microsoft Clarity behind a consent banner | Clarity gives session recordings, but needs consent from EEA visitors to record them |
 | 2026-10-09 | Health tags are marketing-led, based on the ingredients' real nutrients | Alex's choice: marketing first. See Known gaps |
-| 2026-10-09 | Branch per change + pull request reviewed and merged by Alex. Private GitHub repo `happy-dev/nuvou.food` | Alex sees every change line by line before it reaches `main` |
+| 2026-10-09 | Pull requests (squash-merged by Alex) for real chunks of work. Small changes are approved in the conversation, then committed to `main`. Private GitHub repo `happy-dev/nuvou.food` | Alex reviews everything before it reaches `main`, without process overhead on tiny changes. PRs will also carry preview links once hosting exists |
 | 2026-10-09 | Documentation is this file plus a short README. The working plan stays private | One source of truth, kept in sync with the code |
 | — | Open: hosting (free or one cheap multi-app server), logo variant (Vivi) | To decide later |
 
