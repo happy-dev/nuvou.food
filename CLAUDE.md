@@ -10,6 +10,8 @@ The site has 3 pages: **Home, Shop (with product pages), About us**. It's biling
 - **Claude drafts first** (copy, layouts, product content), then we iterate.
 - **Ask for accounts and services just in time**, when the step that needs them starts.
 - **Git workflow:** `main` always works, and once the site is hosted, merging into `main` deploys it. **Real chunks of work** (a phase, a page, checkout…) go on a short-lived branch (`feat/…`, `fix/…`, `phase-N/…`), then into a GitHub pull request with an explanation. Alex reviews it and squash-merges it. **Small changes** (docs, decisions, minor fixes): show Alex the diff in the conversation, and commit directly to `main` once Alex approves.
+- **Edit files with the Edit/Write tools, not shell commands** (sed, python, heredocs). Alex often has files open in the desktop app, which only refreshes them after Edit/Write changes. A stale view also risks Alex saving over Claude's changes. Shell edits are fine only for generated files.
+- **Show changes in the app's diff pane** when asking Alex to approve them.
 - **Documentation is this file plus a short `README.md`.** Don't add other documentation files.
 - **`inputs/` is private and git-ignored:** raw logos, photos, recipe sheets, notes, and the working plan (`inputs/notes/PLAN.md`). Read from it, never commit it, and don't copy private details (such as phone numbers) into versioned files.
 
