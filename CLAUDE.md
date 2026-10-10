@@ -1,6 +1,6 @@
 # Nuvou.food
 
-Ecommerce site for **Nuvou** ("Boa vida na comida"): frozen, whole-food, additive-free, protein-rich, nutritionally balanced, low-carbon prepared meals for busy parents in Portugal. Founded by Vivi and Alex, who have batch-cooked for their family for 3 years.
+Ecommerce site for **Nuvou** ("Boa vida na comida"): whole-food, additive-free, protein-rich, nutritionally balanced, low-carbon prepared meals for busy parents in Portugal. Frozen main dishes and rice, plus fresh salads made each morning. Founded by Vivi and Alex, who have batch-cooked for their family for 3 years.
 
 The site has 3 pages: **Home, Shop (with product pages), About us**. It's bilingual (**pt-PT + en**, chosen from the browser language) and mobile-first. v1 launches with 3 recipes.
 
@@ -21,10 +21,10 @@ The site has 3 pages: **Home, Shop (with product pages), About us**. It's biling
 - **Postgres on Neon.**
 - Content model:
   - **Global `SiteSettings`:**
-    - portion sizes S 180 mL / M 750 mL / L 1200 mL, each with a default price
+    - portion sizes S 180 mL / M 750 mL / L 1200 mL, each with a default price and an approximate number of adult portions (used to show the price per portion)
     - delivery fee, delivery window, same-day cut-off
     - contact email and Instagram link
-  - **`Recipes`:** localized name and description, internal source links, ingredients with grams, photos, nutrition percentages, health tags, carbon footprint (kg CO₂e per portion), optional price override per size, **stock per size** (number of portions available, decremented when an order is paid).
+  - **`Recipes`:** a **type** (main dish, rice, or salad; the shop is grouped by type, and the type sets the storage instructions: freezer for mains and rice, fridge for salads, which keep 5 days unseasoned), localized name and description, internal source links, ingredients with grams, photos, nutrition percentages, health tags, carbon footprint (kg CO₂e per portion), optional price override per size, **stock per size** (number of portions available, decremented when an order is paid).
   - **`ProductionRequests`:** made when a recipe is fully out of stock. Recipe, requested sizes and quantities, customer email (required, so we can reply), optional name, and a status (awaiting verification, new, planned, ready — setting "ready" emails the customer). Requests still awaiting verification after 7 days are deleted.
   - **`HealthTags`:** localized name, icon, explanation.
   - **`Orders`:** written by the Stripe webhook. Status is paid, delivered, or refunded – outside area.
@@ -43,6 +43,7 @@ The site has 3 pages: **Home, Shop (with product pages), About us**. It's biling
   - When the portions are produced, Alex sets the request to **ready** in `/admin`. That automatically sends the customer a "your meal is ready, order it now" email linking to the product page.
   - Every new request emails Alex straight away (via Resend). The email gives the recipe, sizes and quantities, and the sender: first and last name plus email if verified or known, otherwise the email with an **unverified** flag.
   - Stock is checked again in the checkout server action, and decremented by the webhook.
+- **"Complete your meal":** main-dish pages suggest rice and a salad, each added to the cart in one click (in the same size by default).
 - **Abuse protection:** every server action that sends an email or creates a checkout session goes through the same guard: Turnstile check, honeypot and timing check, rate limit, and schema validation. Never add an email-sending endpoint without it.
 - **Customer accounts are optional.** Guest checkout sits next to "Continue with Google" and an emailed sign-in link. Orders are linked by email, so "My orders" also shows orders placed as a guest.
 - **Seed script:** content Claude drafts is loaded into Payload, then refined in `/admin`.
@@ -60,6 +61,7 @@ The site has 3 pages: **Home, Shop (with product pages), About us**. It's biling
 | 2026-10-09 | No delivery-zone restriction. Out-of-area orders are refunded in full and logged | Don't turn customers away. Recurring demand from an area shows where to expand delivery |
 | 2026-10-09 | Stripe Checkout: cards, Apple Pay, Google Pay, MB WAY. Multibanco off | MB WAY and EU cards cost 1.5% + €0.25 per payment. Multibanco costs 2.95% + €0.25 and is paid asynchronously, which clashes with same-day delivery |
 | 2026-10-09 | Guest checkout plus optional login (Google, emailed link). The provider (Neon Auth or Better Auth) is chosen in Phase 5 | A mandatory account is a major cause of abandoned carts. Orders linked by email still give customers their order history |
+| 2026-10-10 | Products have a type (main dish, rice, salad), with the shop grouped by type, plus a "Complete your meal" cross-sell on main-dish pages. No full categories system | Nuvou sells complete meals: a portion is served with rice and optionally salad. A simple type field is enough to organise the menu and build the cross-sell. No desserts for now |
 | 2026-10-09 | Stock per recipe and size. A size at 0 is disabled. When a recipe is fully out of stock, customers can request production (several sizes and quantities) | Meals are made in batches. Requests show real demand and help plan the next cooking session |
 | 2026-10-09 | Resend in v1 (free tier, 3,000 emails/month) for sign-in and verification links, plus production-request notifications to Alex. Order confirmations still come from Stripe receipts | Replaces "no email service in v1", which contradicted the emailed sign-in link |
 | 2026-10-09 | Each production request emails Alex at submission time. Verified or known senders are shown with their name and email. Unverified senders are shown by email with an "unverified" flag | Alex sees demand immediately and can judge whether an unverified request is legitimate |
