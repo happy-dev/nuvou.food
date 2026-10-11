@@ -1,0 +1,17 @@
+{
+  "Metadata": {
+    "title": "Nuvou · Boa vida na comida",
+    "description": "Refeições caseiras, ricas em proteína e sem aditivos, da nossa cozinha para a tua. Entregues no próprio dia."
+  },
+  "Nav": {
+    "menu": "Menu",
+    "about": "Sobre nós",
+    "cart": "Carrinho ({count})",
+    "switchLanguage": "English"
+  },
+  "Home": {
+    "headline": "Comida feita em casa. <em>Sem a chatice.</em> Que cabe no teu bolso.",
+    "subtitle": "Refeições caseiras, ricas em proteína e sem aditivos, da nossa cozinha para a tua. Pratos e arroz entregues congelados, saladas feitas nessa manhã. Jantar em minutos. Aprovado pelos miúdos.",
+    "comingSoon": "O site está a ser cozinhado. Volta em breve!"
+  }
+}

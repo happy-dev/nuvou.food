@@ -1,0 +1,17 @@
+{
+  "Metadata": {
+    "title": "Nuvou · Boa vida na comida",
+    "description": "Whole-food, protein-rich meals with zero additives, from our kitchen to yours. Delivered the same day."
+  },
+  "Nav": {
+    "menu": "Menu",
+    "about": "About us",
+    "cart": "Cart ({count})",
+    "switchLanguage": "Português"
+  },
+  "Home": {
+    "headline": "Home-cooked food. <em>None of the hassle.</em> Easy on your budget.",
+    "subtitle": "Whole-food, protein-rich meals with zero additives, from our kitchen to yours. Main dishes and rice delivered frozen, salads made fresh that morning. Dinner in minutes. Kid-approved.",
+    "comingSoon": "The site is still cooking. Come back soon!"
+  }
+}

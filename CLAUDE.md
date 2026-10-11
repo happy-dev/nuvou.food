@@ -13,12 +13,30 @@ The site has 3 pages: **Home, Shop (with product pages), About us**. It's biling
 - **Edit files with the Edit/Write tools, not shell commands** (sed, python, heredocs). Alex often has files open in the desktop app, which only refreshes them after Edit/Write changes. A stale view also risks Alex saving over Claude's changes. Shell edits are fine only for generated files.
 - **Show changes in the app's diff pane** when asking Alex to approve them.
 - **Documentation is this file plus a short `README.md`.** Don't add other documentation files.
-- **`inputs/` is private and git-ignored:** raw logos, photos, recipe sheets, notes, and the working plan (`inputs/notes/PLAN.md`). Read from it, never commit it, and don't copy private details (such as phone numbers) into versioned files.
+- **`inputs/` is private and git-ignored:** raw logos, photos, recipe sheets, notes, and the working plan (`inputs/notes/PLAN.md`). Read from it, never commit it, and don't copy private details (such as phone numbers) into versioned files. The site copy to implement is in `inputs/notes/COPY.md`.
+- **Payload specifics:** use the Payload skill in `.claude/skills/payload/` (start with `SKILL.md`).
+
+## Code map and commands
+- **Node 24** (`.nvmrc`), **npm**. On Alex's Mac, run commands through fnm: `fnm exec --using=24 npm run dev`. Secrets live in `.env.local` (git-ignored, see `.env.example`).
+- `npm run dev` · `npm run build` · `npm run lint` · `npm run generate:types` (after changing collections) · `npm run generate:importmap` (after adding admin components).
+
+```
+src/
+  app/(site)/[locale]/   public pages, one tree per language (layout.tsx loads fonts, i18n and globals.css)
+  app/(site)/globals.css Tailwind + design tokens (@theme): bg-marrom, text-rosa, font-display, rounded-card…
+  app/(payload)/         Payload admin (/admin) and API (/api). Generated, don't edit by hand
+  collections/           one file per Payload collection
+  i18n/                  routing.ts (locales, localized URLs), request.ts, navigation.ts (use its Link)
+  proxy.ts               language detection and redirects (Next.js 16's name for middleware)
+  payload.config.ts      Payload config: database, collections, content localization (pt default, en)
+messages/pt.json, en.json  interface texts (buttons, labels, errors)
+public/brand/              logo files
+```
 
 ## Architecture
-*Planned; nothing is built yet. Update this section to describe the real code once Phase 4 starts.*
+*Built so far (PR 1, foundation): Next.js + Payload + Postgres wiring, PT/EN routing, design tokens, and a temporary page. Everything below the first three bullets is still planned.*
 
-- **Next.js (App Router) + TypeScript + Tailwind**, with **next-intl** routes `/pt` and `/en`, detected from `Accept-Language`.
+- **Next.js (App Router) + TypeScript + Tailwind**, with **next-intl** routes `/pt` and `/en`, detected from `Accept-Language`. URLs are localized: `/pt/sobre-nos` vs `/en/about`.
 - **Payload CMS 3** runs inside the same Next.js app: the admin is at `/admin`, and code reads content through Payload's Local API. Payload's built-in auth is for admins only.
 - **Postgres on Neon.**
 - Content model:
@@ -81,6 +99,8 @@ The site has 3 pages: **Home, Shop (with product pages), About us**. It's biling
 | 2026-10-11 | Official palette: Laranja vibrante `#FB3B00`, Azul elétrico `#0025E9`, Roxo vibrante `#BC3FDE`, Marrom-escuro `#661414`, Rosa chiclete `#FFB3F7`, Branco `#FFFFFF` (source: `inputs/design/NUV_paleta_11OUT26_vm.png`) | Defined by Vivi. Vibrant colours carry the humour, marrom and white keep the site readable |
 | 2026-10-11 | Visual direction inspired by Sweetgreen: food photos as the hero, oversized calm headlines, pill buttons, alternating colour bands, product cards with no frame. Its proprietary fonts (SweetSans, Grenette) can't be used, so we use Google Fonts equivalents. The brand must be clearly visible in the first section: a hero block in palette colours with a large logo | Food has to look appetising. Vivi's feedback: in the first version the white hero block hid the brand |
 | 2026-10-11 | Design tokens. **Colour roles:** page background Branco, body text and headings Marrom, primary button Laranja with Branco text, band A Rosa with Marrom text, band B Marrom with Rosa text, badges and top bar Laranja with Branco text, footer Marrom with Rosa text, hero block Marrom with Rosa text (it blends with the rosa logo's marrom background). **Fonts (Google Fonts):** Fraunces weight 400 for headings, Fraunces light italic (300) for highlighted words, DM Sans for body and UI. **Shape:** pill buttons, 20px image corners, 24px card corners | Chosen by Alex and Vivi from the prototype (`inputs/design/prototype/index.html`, private, reference only; no longer updated) |
+| 2026-10-11 | Start from Payload's **blank** template, not its full ecommerce template. In Phase 5, add Payload's official **ecommerce plugin** (cart, orders, transactions, Stripe) instead of writing those parts ourselves | A small codebase Alex understands line by line. The sensitive payment and order logic still comes from a maintained, tested plugin. The full template brings a page builder, search, variants, dark mode and password accounts we don't need, and no PT/EN support |
+| 2026-10-11 | Tooling: Node 24 LTS (pinned in `.nvmrc`, via fnm), npm, next-intl with localized URLs, Tailwind v4 with the design tokens as a `@theme`, fonts self-hosted through `next/font` | LTS is what Next.js and Payload are tested on. npm avoids an extra tool. Self-hosted fonts mean no request from the visitor to Google: faster and better for privacy |
 | — | Open: logo variant (Vivi; the rosa/marrom logo is used meanwhile, SVGs to come), hosting (free or one cheap multi-app server) | To decide later |
 
 ## Known gaps (deferred on purpose; resolve before the public launch)
