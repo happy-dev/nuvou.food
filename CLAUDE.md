@@ -24,7 +24,7 @@ The site has 3 pages: **Home, Shop (with product pages), About us**. It's biling
 - Content model:
   - **Global `SiteSettings`:**
     - portion sizes S 180 mL / M 750 mL / L 1200 mL, each with a default price and an approximate number of adult portions (used to show the price per portion)
-    - delivery fee, delivery window, same-day cut-off
+    - delivery fee, free-delivery threshold, delivery window, same-day cut-off
     - contact email and Instagram link
   - **`Recipes`:** a **type** (main dish, rice, or salad; the shop is grouped by type, and the type sets the storage instructions: freezer for mains and rice, fridge for salads, which keep 5 days unseasoned), localized name and description, internal source links, ingredients with grams, photos, nutrition percentages, health tags, carbon footprint (kg CO₂e per portion), optional price override per size, **stock per size** (number of portions available, decremented when an order is paid), and a **featured** toggle.
   - **`ProductionRequests`:** made when a recipe is fully out of stock. Recipe, requested sizes and quantities, customer email (required, so we can reply), optional name, and a status (awaiting verification, new, planned, ready — setting "ready" emails the customer). Requests still awaiting verification after 7 days are deleted.
@@ -34,7 +34,7 @@ The site has 3 pages: **Home, Shop (with product pages), About us**. It's biling
   - **`Media`** and **`Users`** (admins).
 - **Checkout:**
   1. The client-side cart is sent to a server action, which re-prices it from the database.
-  2. The server action creates a Stripe Checkout session, with the delivery fee as a line item and Stripe collecting the address and phone number.
+  2. The server action creates a Stripe Checkout session, with the delivery fee as a line item (free when the cart reaches the threshold) and Stripe collecting the address and phone number.
   3. A webhook creates the `Order`.
   4. The success page states the expected delivery slot.
 - **Stock and out-of-stock behaviour:**
@@ -60,7 +60,7 @@ The site has 3 pages: **Home, Shop (with product pages), About us**. It's biling
 | 2026-10-09 | Custom build (Next.js + Payload + Stripe) rather than Shopify or WooCommerce | Small scope (one-off orders, few products). Stripe handles payments. Payload gives a free admin. Full design freedom and no platform fees |
 | 2026-10-09 | Payload CMS 3 for the admin and CMS | Open source and free. Runs inside the Next.js app, so one codebase and one deploy. Built-in localization. Typed API, so AI-drafted content can be seeded |
 | 2026-10-09 | Postgres on Neon (free tier) | Generous free tier, managed, nothing to operate |
-| 2026-10-09 | Delivery: Mon–Fri 17:00–20:30, same-day before 16:30, €5 fee, no date picker | Matches how Vivi and Alex deliver |
+| 2026-10-09 | Delivery: Mon–Fri 17:00–20:30, same-day before 16:30, €5 fee, **free over €30** (added 2026-10-11), no date picker. The cart shows how much is left to reach free delivery | Matches how Vivi and Alex deliver. The threshold encourages bigger orders that stock several dinners |
 | 2026-10-09 | No delivery-zone restriction. Out-of-area orders are refunded in full and logged | Don't turn customers away. Recurring demand from an area shows where to expand delivery |
 | 2026-10-09 | Stripe Checkout: cards, Apple Pay, Google Pay, MB WAY. Multibanco off | MB WAY and EU cards cost 1.5% + €0.25 per payment. Multibanco costs 2.95% + €0.25 and is paid asynchronously, which clashes with same-day delivery |
 | 2026-10-09 | Guest checkout plus optional login (Google, emailed link). The provider (Neon Auth or Better Auth) is chosen in Phase 5 | A mandatory account is a major cause of abandoned carts. Orders linked by email still give customers their order history |
