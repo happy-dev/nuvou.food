@@ -1,9 +1,25 @@
-node_modules/
-.next/
-.env*
-!.env.example
-.DS_Store
-*.log
-
 # Private source materials (logos, photos, product sheets, notes) — never committed
 inputs/
+
+# Dependencies
+node_modules/
+
+# Next.js / build output
+.next/
+out/
+build/
+next-env.d.ts
+*.tsbuildinfo
+
+# Environment (secrets): only .env.example is committed
+.env
+.env*.local
+
+# Uploaded media in local development
+/media
+
+# Misc
+.DS_Store
+*.pem
+*.log
+.vercel

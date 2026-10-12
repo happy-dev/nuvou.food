@@ -1,0 +1,57 @@
+@import 'tailwindcss';
+
+/*
+ * Nuvou design tokens (see CLAUDE.md → Decisions → "Design tokens").
+ * Each token becomes Tailwind utilities: bg-marrom, text-rosa, font-display, rounded-card…
+ */
+@theme {
+  /* Official palette */
+  --color-laranja: #fb3b00;
+  --color-azul: #0025e9;
+  --color-roxo: #bc3fde;
+  --color-marrom: #661414;
+  --color-rosa: #ffb3f7;
+  --color-branco: #ffffff;
+
+  /* Fonts: loaded with next/font in the layout, which sets these variables */
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+
+  /* Shapes */
+  --radius-img: 20px;
+  --radius-card: 24px;
+}
+
+/*
+ * Colour roles: use these in components rather than raw colours, so a role can
+ * be changed in one place.
+ */
+@layer base {
+  :root {
+    --page: var(--color-branco);
+    --ink: var(--color-marrom);
+  }
+
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  /* Highlighted words inside headings: Fraunces light italic */
+  h1 em,
+  h2 em,
+  h3 em {
+    font-style: italic;
+    font-weight: 300;
+  }
+}

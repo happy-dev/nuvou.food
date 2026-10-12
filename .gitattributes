@@ -1,0 +1,6 @@
+# Files written by tools, not by us. GitHub collapses them in pull requests
+# ("linguist-generated") so reviews show only hand-written code.
+package-lock.json linguist-generated=true
+src/payload-types.ts linguist-generated=true
+src/app/(payload)/** linguist-generated=true
+.claude/skills/** linguist-generated=true
