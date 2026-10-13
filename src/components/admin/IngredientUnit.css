@@ -1,0 +1,18 @@
+/* Read-only unit shown next to the quantity stepper, at the same height. */
+.ingredient-unit__label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--theme-elevation-800);
+}
+
+.ingredient-unit__value {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: var(--theme-elevation-50);
+  color: var(--theme-text);
+  font-size: 18px;
+  font-weight: 600;
+}

@@ -5,8 +5,15 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
-import { Users } from './collections/Users'
+import { HealthTags } from './collections/HealthTags'
+import { Ingredients } from './collections/Ingredients'
 import { Media } from './collections/Media'
+import { Nutrients } from './collections/Nutrients'
+import { Recipes } from './collections/Recipes'
+import { StockMovements } from './collections/StockMovements'
+import { Units } from './collections/Units'
+import { Users } from './collections/Users'
+import { SiteSettings } from './globals/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -31,7 +38,9 @@ export default buildConfig({
     defaultLocale: 'pt',
     fallback: true,
   },
-  collections: [Users, Media],
+  // The order here is the order in the admin sidebar, within each group.
+  collections: [Recipes, StockMovements, Ingredients, Units, Nutrients, HealthTags, Media, Users],
+  globals: [SiteSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

@@ -20,7 +20,8 @@ The site has 3 pages: **Home, Shop (with product pages), About us**. It's biling
 
 ## Code map and commands
 - **Node 24** (`.nvmrc`), **npm**. On Alex's Mac, run commands through fnm: `fnm exec --using=24 npm run dev`. Secrets live in `.env.local` (git-ignored, see `.env.example`).
-- `npm run dev` · `npm run build` · `npm run lint` · `npm run generate:types` (after changing collections) · `npm run generate:importmap` (after adding admin components).
+- `npm run dev` · `npm run build` · `npm run lint` · `npm test` (Vitest, `src/**/*.test.ts`) · `npm run seed` (dev database only; never overwrites Site settings or health tags, add `-- --reset-settings` to force the settings) · `npm run generate:types` (after changing collections) · `npm run generate:importmap` (after adding admin components).
+- **Before declaring a step done:** `npm test`, `npm run lint` and `npm run build` pass.
 - **Dependencies are pinned to exact versions** (`save-exact=true` in `.npmrc`): upgrade deliberately, all `@payloadcms/*` packages together. Run `npm audit` before going live and after each Payload/Next.js upgrade. Known leftovers on 2026-10-12: dev/build-only tools (braces, sass, chokidar, esbuild, drizzle-kit) and `undici` inside Payload 3.90.2, waiting for upstream fixes.
 
 ```
@@ -28,7 +29,15 @@ src/
   app/(site)/[locale]/   public pages, one tree per language (layout.tsx loads fonts, i18n and globals.css)
   app/(site)/globals.css Tailwind + design tokens (@theme): bg-marrom, text-rosa, font-display, rounded-card…
   app/(payload)/         Payload admin (/admin) and API (/api). Generated, don't edit by hand
-  collections/           one file per Payload collection
+  collections/           one file per Payload collection (Recipes, StockMovements, Ingredients, Units, Nutrients,
+                         HealthTags, Media, Users)
+  components/admin/      custom admin UI: StepperField (−/+), IngredientUnit (read-only unit), PlainTextCell
+  globals/               Payload globals (SiteSettings)
+  fields/                reusable field builders (sizes.ts: S/M/L number rows)
+  access/                reusable access rules (anyone, isAdmin)
+  lib/                   pure business logic + tests: pricing.ts, delivery.ts, stock.ts, healthTags.ts, slugify.ts; settings.ts maps
+                         the SiteSettings document to their inputs. No Payload calls here.
+  seed/                  npm run seed: real settings + sample recipes (slug "exemplo-…", safe to re-run)
   i18n/                  routing.ts (locales, localized URLs), request.ts, navigation.ts (use its Link)
   proxy.ts               language detection and redirects (Next.js 16's name for middleware)
   payload.config.ts      Payload config: database, collections, content localization (pt default, en)
@@ -37,22 +46,31 @@ public/brand/              logo files
 ```
 
 ## Architecture
-*Built so far (PR 1, foundation): Next.js + Payload + Postgres wiring, PT/EN routing, design tokens, and a temporary page. Everything below the first three bullets is still planned.*
+*Built so far: step 1 (Next.js + Payload + Postgres, PT/EN routing, design tokens, temporary page) and step 2 (`SiteSettings`, `Recipes`, stock log, ingredients/units/nutrients/health tags, localized `Media`, pricing/delivery/stock/tag logic with tests, seed). Everything else below is still planned.*
+
+- **Vocabulary in code, values in the admin:** the lists that shape the data model and the code's behaviour (sizes `SIZES`, product types `PRODUCT_TYPES`, stock reasons `STOCK_REASONS`) are declared once in `src/lib/`; admin fields are generated from them (`src/fields/`). Lists Vivi and Alex grow themselves (units, ingredients, nutrients, health tags) are collections. Values (prices, portions, stock, texts) live in the database and are edited in `/admin`. Never re-type these lists elsewhere.
+- **Money:** prices are entered in euros in the admin; all arithmetic is done in integer cents (`src/lib/pricing.ts`). Never compute prices with floating-point euros.
+- **Time:** delivery slots are computed in Lisbon time (`Europe/Lisbon`), whatever the server's timezone (`src/lib/delivery.ts`).
+- **Access:** public read for recipes, tags, media and site settings; writes are admins only. Internal fields (e.g. `Recipes.sourceLinks`) use field-level read access so the public API never returns them. In Local API calls made on behalf of a visitor, pass `overrideAccess: false`.
 
 - **Next.js (App Router) + TypeScript + Tailwind**, with **next-intl** routes `/pt` and `/en`, detected from `Accept-Language`. URLs are localized: `/pt/sobre-nos` vs `/en/about`.
 - **Payload CMS 3** runs inside the same Next.js app: the admin is at `/admin`, and code reads content through Payload's Local API. Payload's built-in auth is for admins only.
 - **Postgres on Neon.**
 - Content model:
   - **Global `SiteSettings`:**
-    - portion sizes S 180 mL / M 750 mL / L 1200 mL, each with a default price and an approximate number of adult portions (used to show the price per portion)
-    - delivery fee, free-delivery threshold, delivery window, same-day cut-off
+    - portion sizes S 180 mL / M 750 mL / L 1200 mL, each with an approximate number of adult portions (used to show the price per portion)
+    - default prices **per product type and size** (main dishes, rice, salads), so the complete-dinner price per person can be computed
+    - delivery fee, free-delivery threshold, delivery days, delivery window, same-day cut-off
+    - **closed dates**: periods with no delivery (public holidays, holidays away). The delivery slot skips them; orders placed meanwhile go to the next open delivery day
     - default storage and reheating text per product type (localized)
     - contact email, and an optional Instagram link (the footer hides it while it's empty)
-  - **`Recipes`:** a **type** (main dish, rice, or salad; the shop is grouped by type, and the type sets the storage instructions: freezer for mains and rice, fridge for salads, which keep 5 days unseasoned), localized name and description, internal source links, ingredients with grams, photos, nutrition percentages, health tags, carbon footprint (kg CO₂e per portion), optional price override per size, an optional storage/reheating text that overrides the type's default (e.g. pies go in the oven), a short serving suggestion, a **"suggest rice"** toggle for main dishes (on by default, off for dishes that already include their own starch, such as potatoes or pies), **stock per size** (number of portions available, decremented when an order is paid), and a **featured** toggle.
-  - **`ProductionRequests`:** made when a recipe is fully out of stock. Recipe, requested sizes and quantities, customer email (required, so we can reply), optional name, and a status (awaiting verification, new, planned, ready — setting "ready" emails the customer). Requests still awaiting verification after 7 days are deleted.
-  - **`HealthTags`:** localized name, icon, explanation.
-  - **`Orders`:** written by the Stripe webhook. Status is paid, delivered, or refunded – outside area.
-  - **Globals `HomePage` and `AboutPage`** (a Payload "global" is a single document, unlike a collection): the localized marketing copy and images of those pages, editable in `/admin` without a deploy. Interface text (buttons, labels, errors) lives in next-intl message files (`messages/pt.json`, `messages/en.json`).
+  - **`Recipes`:** a **type** (main dish, rice, or salad; the shop is grouped by type, and the type sets the storage instructions: freezer for mains and rice, fridge for salads, which keep 5 days unseasoned), localized name and description, internal source links and **notes for the chef** (a dated log, one note per batch, author filled in automatically; both admin-only via field-level read access), **ingredients per batch** (each row: an ingredient from the Ingredients collection + a quantity; the unit comes from the ingredient and is shown read-only), photos, nutrition percentages (share of energy: protein, carbs, fat, fibre), **notable nutrients** (picked from Nutrients; the health tags are inferred from them, never ticked), optional price override per size, an optional storage/reheating text that overrides the type's default (e.g. pies go in the oven), a short serving suggestion, a **"suggest rice"** toggle for main dishes (on by default, off for dishes that already include their own starch, such as potatoes or pies), **stock per size** (containers available; read-only, computed from the stock log), and a **featured** toggle. No per-recipe carbon figure for now: the site uses one site-wide estimate.
+  - **`StockMovements` ("Stock log"):** every stock change is an entry: recipe, reason, containers per size (big −/+ steppers), note. **The reason sets the direction** (`STOCK_REASONS` in `src/lib/stock.ts`: own use, direct sale (outside the site) and loss remove, production adds); only a correction asks for add/remove. New entries default to "Own use". Sales are never entered by hand: in Phase 5, each paid order creates an automatic "order" entry. Hooks apply each entry to the recipe's stock in the same transaction, and refuse anything that would make stock negative (the whole operation rolls back). Entries are never edited: delete one (which reverses it) and add a correct one. `Recipes.stock` can only be written by these hooks (field-level update access checks `req.context.fromStockMovement`). Known limit: read-then-write updates; Phase 5's order webhook must use an atomic SQL increment, since orders can arrive concurrently.
+  - **`ProductionRequests`** *(Phase 5)***:** made when a recipe is fully out of stock. Recipe, requested sizes and quantities, customer email (required, so we can reply), optional name, and a status (awaiting verification, new, planned, ready — setting "ready" emails the customer). Requests still awaiting verification after 7 days are deleted.
+  - **`Units`** (internal, Portuguese, admins only), **`Ingredients`** (localized name shown on the site + its unit, admins-only field), **`Nutrients`** (localized name + optional localized benefit, shown on the site): reference lists edited in `/admin`, sidebar group "Ingredients & nutrition". Consistent ingredients and units make a future shopping list possible.
+  - **`HealthTags`:** localized name, the nutrients that trigger it (relationship), explanation, emoji icon. **A recipe shows a tag when at least one of its notable nutrients is among the tag's nutrients** (`inferHealthTags` in `src/lib/healthTags.ts`).
+  - **`Orders`** *(Phase 5, with Payload's ecommerce plugin)***:** written by the Stripe webhook. Status is paid, delivered, or refunded – outside area.
+  - **Globals `HomePage` and `AboutPage`** *(step 3, built together with those pages)* (a Payload "global" is a single document, unlike a collection): the localized marketing copy and images of those pages, editable in `/admin` without a deploy. Interface text (buttons, labels, errors) lives in next-intl message files (`messages/pt.json`, `messages/en.json`).
   - **`Media`** and **`Users`** (admins).
 - **Checkout:**
   1. The client-side cart is sent to a server action, which re-prices it from the database.
@@ -66,12 +84,12 @@ public/brand/              logo files
   - Once a request is accepted (immediately, or after verification), the customer receives a **confirmation email** summarising what they asked for.
   - When the portions are produced, Alex sets the request to **ready** in `/admin`. That automatically sends the customer a "your meal is ready, order it now" email linking to the product page.
   - Every new request emails Alex straight away (via Resend). The email gives the recipe, sizes and quantities, and the sender: first and last name plus email if verified or known, otherwise the email with an **unverified** flag.
-  - Stock is checked again in the checkout server action, and decremented by the webhook.
+  - Stock is checked again in the checkout server action, and decremented by the webhook through a stock-log entry (reason "order").
 - **"Complete your meal":** main-dish pages suggest a salad, plus a rice when the dish's "suggest rice" toggle is on, each added to the cart in one click (in the same size by default). Products stay independent, with no pairing between a dish and a specific rice or salad. The suggestion uses the same rule as the Home page: in stock only, "featured" first, then most ordered.
 - **Home "Most ordered":** products of every type (main dishes, rice, salads), **in stock only**. Products marked **"featured"** in `/admin` come first (for example, a signature quinoa salad), then the rest by number of paid orders.
 - **Abuse protection:** every server action that sends an email or creates a checkout session goes through the same guard: Turnstile check, honeypot and timing check, rate limit, and schema validation. Never add an email-sending endpoint without it.
 - **Customer accounts are optional.** Guest checkout sits next to "Continue with Google" and an emailed sign-in link. Orders are linked by email, so "My orders" also shows orders placed as a guest.
-- **Seed script:** content Claude drafts is loaded into Payload, then refined in `/admin`.
+- **Seed script** (`npm run seed`, dev only): loads the real site settings, health tags and sample recipes (slug `exemplo-…`, name "(exemplo)") with stand-in Unsplash photos. Re-runnable: it only deletes items prefixed `exemplo-`. Real recipes replace the samples after Phase 2.
 
 ## Decisions
 
@@ -104,6 +122,10 @@ public/brand/              logo files
 | 2026-10-11 | Design tokens. **Colour roles:** page background Branco, body text and headings Marrom, primary button Laranja with Branco text, band A Rosa with Marrom text, band B Marrom with Rosa text, badges and top bar Laranja with Branco text, footer Marrom with Rosa text, hero block Marrom with Rosa text (it blends with the rosa logo's marrom background). **Fonts (Google Fonts):** Fraunces weight 400 for headings, Fraunces light italic (300) for highlighted words, DM Sans for body and UI. **Shape:** pill buttons, 20px image corners, 24px card corners | Chosen by Alex and Vivi from the prototype (`inputs/design/prototype/index.html`, private, reference only; no longer updated) |
 | 2026-10-11 | Start from Payload's **blank** template, not its full ecommerce template. In Phase 5, add Payload's official **ecommerce plugin** (cart, orders, transactions, Stripe) instead of writing those parts ourselves | A small codebase Alex understands line by line. The sensitive payment and order logic still comes from a maintained, tested plugin. The full template brings a page builder, search, variants, dark mode and password accounts we don't need, and no PT/EN support |
 | 2026-10-11 | Tooling: Node 24 LTS (pinned in `.nvmrc`, via fnm), npm, next-intl with localized URLs, Tailwind v4 with the design tokens as a `@theme`, fonts self-hosted through `next/font` | LTS is what Next.js and Payload are tested on. npm avoids an extra tool. Self-hosted fonts mean no request from the visitor to Google: faster and better for privacy |
+| 2026-10-12 | Content model, step 2: default prices **per product type** (main, rice, salad) × size in `SiteSettings`; one `Recipes` collection with a `type` field; prices stored in euros and computed in cents; business rules as pure, unit-tested functions in `src/lib`; a re-runnable seed with "exemplo-" sample recipes until Phase 2 delivers the real ones. `HomePage`/`AboutPage` move to step 3, `Orders`/`ProductionRequests` to Phase 5 | Rice has its own prices, needed for "€4.75 per person". Pure functions make the money and time rules testable without a database. Each global/collection arrives with the code that uses it |
+| 2026-10-12 | **Stock log** (`StockMovements`): stock changes only through entries (add/remove × production, loss, own use, correction), never by editing a number. Entries are immutable; deleting one reverses it | Matches how Vivi and Alex pack: they fill whatever containers they have (e.g. medium when large ones run out). Gives a history and losses (salads keep 5 days), and prevents an open recipe form from overwriting a newer stock figure |
+| 2026-10-12 | **No per-recipe carbon figure** for now: one site-wide estimate (the study-based "about 4× less"). Nutrition is stored **per recipe as percentages** only; no per-portion values, so no "portions per batch" field | Percentages are the same for a batch or a portion. Per-recipe carbon will come later |
+| 2026-10-13 | **Ingredients, units and nutrients are admin-managed lists.** Recipes pick ingredients (autocomplete, create on the fly) and enter a quantity (−/+ by 1); the unit is the ingredient's, shown read-only. Recipes tick **notable nutrients**; **health tags are inferred** from them (a tag's nutrients ∩ the recipe's) | Consistent names and units enable a shopping list later. Nutrients are typed once and shared by recipes and tags, so nothing is duplicated or spelled differently |
 | — | Open: logo variant (Vivi; the rosa/marrom logo is used meanwhile, SVGs to come), hosting (free or one cheap multi-app server) | To decide later |
 
 ## Known gaps (deferred on purpose; resolve before the public launch)

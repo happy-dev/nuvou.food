@@ -11,6 +11,9 @@ const dirname = path.dirname(__filename)
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
 const nextConfig: NextConfig = {
+  // The "N" development indicator defaults to bottom-left, where it covers
+  // Payload's logout button. Development only: never shown on the live site.
+  devIndicators: { position: 'bottom-right' },
   images: {
     localPatterns: [
       { pathname: '/api/media/file/**' },

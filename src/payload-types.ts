@@ -67,8 +67,14 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
+    recipes: Recipe;
+    'stock-movements': StockMovement;
+    ingredients: Ingredient;
+    units: Unit;
+    nutrients: Nutrient;
+    'health-tags': HealthTag;
     media: Media;
+    users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -76,8 +82,14 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
+    recipes: RecipesSelect<false> | RecipesSelect<true>;
+    'stock-movements': StockMovementsSelect<false> | StockMovementsSelect<true>;
+    ingredients: IngredientsSelect<false> | IngredientsSelect<true>;
+    units: UnitsSelect<false> | UnitsSelect<true>;
+    nutrients: NutrientsSelect<false> | NutrientsSelect<true>;
+    'health-tags': HealthTagsSelect<false> | HealthTagsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -87,8 +99,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('pt' | 'en') | ('pt' | 'en')[];
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'site-settings': SiteSetting;
+  };
+  globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+  };
   locale: 'pt' | 'en';
   widgets: {
     collections: CollectionsWidget;
@@ -119,6 +135,187 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recipes".
+ */
+export interface Recipe {
+  id: number;
+  name: string;
+  /**
+   * Groups the menu and sets the default prices and storage text.
+   */
+  type: 'main' | 'rice' | 'salad';
+  /**
+   * 2 sentences: what it is, in appetising words, then one nutrition point.
+   */
+  description?: string | null;
+  /**
+   * The first photo is the main one. Use a real photo of the dish.
+   */
+  photos?: (number | Media)[] | null;
+  /**
+   * e.g. "Serve com o nosso arroz e uma salada fresca." or "Já é completo: junta só uma salada."
+   */
+  servingSuggestion?: string | null;
+  /**
+   * "Complete your meal" suggests a rice. Untick for dishes that bring their own starch (potatoes, pies).
+   */
+  suggestRice?: boolean | null;
+  /**
+   * Leave empty to use the default text for this type (Site settings).
+   */
+  storageOverride?: string | null;
+  /**
+   * Leave empty to use the default price for this type (Site settings).
+   */
+  priceOverrides?: {
+    small?: number | null;
+    medium?: number | null;
+    large?: number | null;
+  };
+  /**
+   * Read-only: computed from the Stock log (Menu → Stock log). Add an entry there to pack a batch or record a loss. 0 = that size shows as sold out.
+   */
+  stock: {
+    small: number;
+    medium: number;
+    large: number;
+  };
+  /**
+   * Per batch, as you cook them. Type to search; "+" creates a new ingredient. The unit comes from the ingredient.
+   */
+  ingredients?:
+    | {
+        ingredient: number | Ingredient;
+        quantity: number;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Nutrients this recipe is a good source of. Shown on the site, and they decide the "Good for" health tags automatically.
+   */
+  notableNutrients?: (number | Nutrient)[] | null;
+  nutrition?: {
+    protein?: number | null;
+    carbs?: number | null;
+    fat?: number | null;
+    fibre?: number | null;
+  };
+  /**
+   * One note per batch, to improve the recipe bit by bit. Never shown on the site.
+   */
+  chefNotes?:
+    | {
+        date: string;
+        author?: (number | null) | User;
+        note: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Recipe references (never shown on the site, admins only).
+   */
+  sourceLinks?:
+    | {
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Shown first in "Most ordered" and "Complete your meal".
+   */
+  featured?: boolean | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  /**
+   * What the image shows, for screen readers and Google. One version per language.
+   */
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * Every ingredient once, with the unit you measure it in. Recipes pick from this list.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ingredients".
+ */
+export interface Ingredient {
+  id: number;
+  /**
+   * Shown on the site: translate it.
+   */
+  name: string;
+  /**
+   * How you measure it. Recipes use this unit automatically.
+   */
+  unit: number | Unit;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Units used for ingredient quantities (internal, in Portuguese).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "units".
+ */
+export interface Unit {
+  id: number;
+  /**
+   * e.g. "colher de sopa"
+   */
+  name: string;
+  /**
+   * Short form shown next to quantities, e.g. "c. sopa". Leave empty to use the name.
+   */
+  abbreviation?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nutrients".
+ */
+export interface Nutrient {
+  id: number;
+  /**
+   * e.g. "Ferro" / "Iron"
+   */
+  name: string;
+  /**
+   * Optional, shown on the site: what it does, in a few words. e.g. "Transporta o oxigénio no sangue"
+   */
+  benefit?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -144,23 +341,57 @@ export interface User {
   collection: 'users';
 }
 /**
+ * Every change to stock: batches packed, losses, corrections. To fix a mistake, delete the entry and add a correct one.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
+ * via the `definition` "stock-movements".
  */
-export interface Media {
+export interface StockMovement {
   id: number;
-  alt: string;
+  recipe: number | Recipe;
+  reason: 'own-use' | 'direct-sale' | 'production' | 'loss' | 'correction';
+  direction?: ('add' | 'remove') | null;
+  quantities: {
+    small: number;
+    medium: number;
+    large: number;
+  };
+  /**
+   * Optional, e.g. "short of large containers".
+   */
+  note?: string | null;
   updatedAt: string;
   createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "health-tags".
+ */
+export interface HealthTag {
+  id: number;
+  /**
+   * e.g. "Ossos fortes" / "Strong bones"
+   */
+  name: string;
+  /**
+   * A recipe shows this tag when it has at least one of these nutrients.
+   */
+  nutrients: (number | Nutrient)[];
+  /**
+   * Optional one-line explanation.
+   */
+  description?: string | null;
+  /**
+   * An emoji, e.g. 🦴
+   */
+  icon?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -187,12 +418,36 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: number | User;
+        relationTo: 'recipes';
+        value: number | Recipe;
+      } | null)
+    | ({
+        relationTo: 'stock-movements';
+        value: number | StockMovement;
+      } | null)
+    | ({
+        relationTo: 'ingredients';
+        value: number | Ingredient;
+      } | null)
+    | ({
+        relationTo: 'units';
+        value: number | Unit;
+      } | null)
+    | ({
+        relationTo: 'nutrients';
+        value: number | Nutrient;
+      } | null)
+    | ({
+        relationTo: 'health-tags';
+        value: number | HealthTag;
       } | null)
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -238,6 +493,151 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recipes_select".
+ */
+export interface RecipesSelect<T extends boolean = true> {
+  name?: T;
+  type?: T;
+  description?: T;
+  photos?: T;
+  servingSuggestion?: T;
+  suggestRice?: T;
+  storageOverride?: T;
+  priceOverrides?:
+    | T
+    | {
+        small?: T;
+        medium?: T;
+        large?: T;
+      };
+  stock?:
+    | T
+    | {
+        small?: T;
+        medium?: T;
+        large?: T;
+      };
+  ingredients?:
+    | T
+    | {
+        ingredient?: T;
+        quantity?: T;
+        id?: T;
+      };
+  notableNutrients?: T;
+  nutrition?:
+    | T
+    | {
+        protein?: T;
+        carbs?: T;
+        fat?: T;
+        fibre?: T;
+      };
+  chefNotes?:
+    | T
+    | {
+        date?: T;
+        author?: T;
+        note?: T;
+        id?: T;
+      };
+  sourceLinks?:
+    | T
+    | {
+        url?: T;
+        id?: T;
+      };
+  featured?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stock-movements_select".
+ */
+export interface StockMovementsSelect<T extends boolean = true> {
+  recipe?: T;
+  reason?: T;
+  direction?: T;
+  quantities?:
+    | T
+    | {
+        small?: T;
+        medium?: T;
+        large?: T;
+      };
+  note?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ingredients_select".
+ */
+export interface IngredientsSelect<T extends boolean = true> {
+  name?: T;
+  unit?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "units_select".
+ */
+export interface UnitsSelect<T extends boolean = true> {
+  name?: T;
+  abbreviation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nutrients_select".
+ */
+export interface NutrientsSelect<T extends boolean = true> {
+  name?: T;
+  benefit?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "health-tags_select".
+ */
+export interface HealthTagsSelect<T extends boolean = true> {
+  name?: T;
+  nutrients?: T;
+  description?: T;
+  icon?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -258,24 +658,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -316,6 +698,134 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  /**
+   * Approximate number of adult portions. Used to show the price per portion and per person.
+   */
+  portions: {
+    small: number;
+    medium: number;
+    large: number;
+  };
+  /**
+   * Used for every recipe of that type, unless the recipe sets its own price.
+   */
+  defaultPrices: {
+    main: {
+      small: number;
+      medium: number;
+      large: number;
+    };
+    rice: {
+      small: number;
+      medium: number;
+      large: number;
+    };
+    salad: {
+      small: number;
+      medium: number;
+      large: number;
+    };
+  };
+  deliveryFee: number;
+  freeDeliveryThreshold: number;
+  deliveryDays: ('1' | '2' | '3' | '4' | '5' | '6' | '7')[];
+  windowStart: string;
+  windowEnd: string;
+  /**
+   * Orders before this time (Lisbon) are delivered the same day.
+   */
+  sameDayCutoff: string;
+  /**
+   * No delivery on these days (public holidays, holidays away). For a single day, use the same date twice. Orders placed meanwhile are scheduled for the next open delivery day.
+   */
+  closedDates?:
+    | {
+        from: string;
+        until: string;
+        /**
+         * e.g. "Natal", "Férias"
+         */
+        reason?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  storageMain: string;
+  storageRice: string;
+  storageSalad: string;
+  contactEmail: string;
+  /**
+   * Optional. The footer shows the Instagram link only once this is filled in.
+   */
+  instagramUrl?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  portions?:
+    | T
+    | {
+        small?: T;
+        medium?: T;
+        large?: T;
+      };
+  defaultPrices?:
+    | T
+    | {
+        main?:
+          | T
+          | {
+              small?: T;
+              medium?: T;
+              large?: T;
+            };
+        rice?:
+          | T
+          | {
+              small?: T;
+              medium?: T;
+              large?: T;
+            };
+        salad?:
+          | T
+          | {
+              small?: T;
+              medium?: T;
+              large?: T;
+            };
+      };
+  deliveryFee?: T;
+  freeDeliveryThreshold?: T;
+  deliveryDays?: T;
+  windowStart?: T;
+  windowEnd?: T;
+  sameDayCutoff?: T;
+  closedDates?:
+    | T
+    | {
+        from?: T;
+        until?: T;
+        reason?: T;
+        id?: T;
+      };
+  storageMain?: T;
+  storageRice?: T;
+  storageSalad?: T;
+  contactEmail?: T;
+  instagramUrl?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
