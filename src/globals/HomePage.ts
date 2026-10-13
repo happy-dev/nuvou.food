@@ -206,7 +206,10 @@ export const HomePage: GlobalConfig = {
           name: 'finalCall',
           label: 'Final call',
           description: 'The delivery facts above the title are computed from Site settings.',
-          fields: [copyField({ name: 'smallPrint', long: true }), copyField({ name: 'title' })],
+          fields: [
+            copyField({ name: 'smallPrint', long: true, required: false, description: 'Optional, under the delivery facts.' }),
+            copyField({ name: 'title' }),
+          ],
         },
       ],
     },

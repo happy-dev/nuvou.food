@@ -42,7 +42,7 @@
       "ours": "Nuvou"
     },
     "delivery": {
-      "fromPerPerson": "Jantar completo desde {price} por pessoa",
+      "fromPerPerson": "Refeição completa desde {price} por pessoa",
       "sameDay": "Entrega no próprio dia",
       "schedule": "{days}, {start}–{end}",
       "freeOver": "Entrega grátis acima de {threshold} (senão, {fee})"

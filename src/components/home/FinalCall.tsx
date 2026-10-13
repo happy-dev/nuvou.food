@@ -25,7 +25,9 @@ export function FinalCall({ content, values }: { content: HomePage['finalCall'];
             <li key={fact}>{fact}</li>
           ))}
         </ul>
-        <Paragraphs text={content.smallPrint} values={values} className="mx-auto mt-4 max-w-[60ch] text-sm opacity-85" />
+        {content.smallPrint && (
+          <Paragraphs text={content.smallPrint} values={values} className="mx-auto mt-4 max-w-[60ch] text-sm opacity-85" />
+        )}
         <h2 className="mb-7 mt-14">
           <Inline text={content.title} values={values} />
         </h2>

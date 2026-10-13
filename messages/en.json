@@ -42,7 +42,7 @@
       "ours": "Nuvou"
     },
     "delivery": {
-      "fromPerPerson": "Complete dinner from {price} per person",
+      "fromPerPerson": "Complete meal from {price} per person",
       "sameDay": "Same-day delivery",
       "schedule": "{days}, {start}–{end}",
       "freeOver": "Free delivery over {threshold} (otherwise {fee})"

@@ -901,7 +901,10 @@ export interface HomePage {
       | null;
   };
   finalCall: {
-    smallPrint: string;
+    /**
+     * Optional, under the delivery facts.
+     */
+    smallPrint?: string | null;
     title: string;
   };
   updatedAt?: string | null;

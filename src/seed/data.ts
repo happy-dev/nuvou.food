@@ -344,8 +344,6 @@ export const homePage = {
       ]),
     },
     finalCall: {
-      smallPrint:
-        'Não sabes se entregamos na tua zona? Encomenda na mesma. Se não conseguirmos lá chegar, devolvemos-te o valor total. E se houver vizinhos suficientes a pedir, passamos a ir.',
       title: 'Hoje à noite, *o jantar já está feito.*',
     },
   },
@@ -421,8 +419,6 @@ export const homePage = {
       ]),
     },
     finalCall: {
-      smallPrint:
-        "Not sure we deliver to you? Order anyway. If we can't get there, we refund you in full, and if enough neighbours ask, we'll start coming.",
       title: "Tonight, *dinner's already done.*",
     },
   },
