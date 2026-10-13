@@ -815,7 +815,7 @@ export interface HomePage {
     title: string;
     text: string;
     /**
-     * A typical family takeaway order, for the receipts visual. The Nuvou receipt is computed from the default prices (size M), and both are divided by the M portions.
+     * A typical family takeaway order, for the receipts visual. Both receipts are divided by the M portions. Leave the delivery fee out: the Nuvou price per person leaves delivery out too, so the comparison stays fair.
      */
     takeaway?:
       | {
@@ -824,6 +824,14 @@ export interface HomePage {
           id?: string | null;
         }[]
       | null;
+    /**
+     * Dish names shown on the Nuvou receipt (the size is added: "Caril de grão M"). Prices always come from the default M prices. Empty: the type is shown ("Prato M").
+     */
+    nuvouReceipt?: {
+      main?: string | null;
+      rice?: string | null;
+      salad?: string | null;
+    };
   };
   kids: {
     /**
@@ -1003,6 +1011,13 @@ export interface HomePageSelect<T extends boolean = true> {
               item?: T;
               amount?: T;
               id?: T;
+            };
+        nuvouReceipt?:
+          | T
+          | {
+              main?: T;
+              rice?: T;
+              salad?: T;
             };
       };
   kids?:

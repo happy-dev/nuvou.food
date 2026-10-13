@@ -78,7 +78,7 @@ export const HomePage: GlobalConfig = {
               labels: { singular: 'Line', plural: 'Lines' },
               admin: {
                 description:
-                  'A typical family takeaway order, for the receipts visual. The Nuvou receipt is computed from the default prices (size M), and both are divided by the M portions.',
+                  'A typical family takeaway order, for the receipts visual. Both receipts are divided by the M portions. Leave the delivery fee out: the Nuvou price per person leaves delivery out too, so the comparison stays fair.',
               },
               fields: [
                 {
@@ -87,6 +87,26 @@ export const HomePage: GlobalConfig = {
                     { name: 'item', type: 'text', localized: true, required: true, admin: { width: '70%' } },
                     { name: 'amount', type: 'number', label: 'Amount (€)', min: 0, required: true, admin: { width: '30%', step: 0.01 } },
                   ],
+                },
+              ],
+            },
+            {
+              name: 'nuvouReceipt',
+              type: 'group',
+              label: 'Nuvou receipt',
+              admin: {
+                description:
+                  'Dish names shown on the Nuvou receipt (the size is added: "Caril de grão M"). Prices always come from the default M prices. Empty: the type is shown ("Prato M").',
+              },
+              fields: [
+                {
+                  type: 'row',
+                  fields: (['main', 'rice', 'salad'] as const).map((type) => ({
+                    name: type,
+                    type: 'text' as const,
+                    localized: true,
+                    admin: { width: '33%' },
+                  })),
                 },
               ],
             },

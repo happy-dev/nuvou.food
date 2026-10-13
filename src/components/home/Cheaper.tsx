@@ -24,8 +24,10 @@ export function Cheaper({ content, values, pricing }: Props) {
   // Rounded to the euro: "≈ 19 €"
   const takeawayPerPerson = `≈ ${formatPrice(Math.round(takeawayTotal / people / 100) * 100, locale)}`
 
+  // A dish name from the admin ("Caril de grão"), or the type ("Prato"), plus the
+  // size, kept on the same line as the last word (non-breaking space).
   const nuvou = (['main', 'rice', 'salad'] as const).map((type) => ({
-    label: `${t(`Product.types.${type}`)} ${t('Product.sizesShort.medium')}`,
+    label: `${content.nuvouReceipt?.[type] || t(`Product.types.${type}`)} ${t('Product.sizesShort.medium')}`,
     cents: priceInCents({ type }, 'medium', pricing),
   }))
 

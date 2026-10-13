@@ -267,8 +267,9 @@ const testimonials = (quotes: [string, string, string]) =>
     { quote: quotes[2], name: 'António Nozes', photo: 'antonio' },
   ] as { quote: string; name: string; photo: HomeImageKey | null }[]
 
-const takeaway = (items: [string, string, string, string]) =>
-  [52, 14, 3.99, 5.9].map((amount, i) => ({ item: items[i], amount }))
+// No delivery fee on the takeaway side: our per-person price leaves delivery
+// out too (free over the threshold, one delivery covers several dinners).
+const takeaway = (items: [string, string, string]) => [52, 14, 5.9].map((amount, i) => ({ item: items[i], amount }))
 
 export const homePage = {
   pt: {
@@ -297,16 +298,17 @@ export const homePage = {
       eyebrow: 'Mais barato',
       title: 'Melhor do que o take-away. *Por uma fração do preço.*',
       text:
-        'O take-away custa facilmente 18–20 € por pessoa. Um jantar Nuvou completo (prato, arroz e salada) custa **{perPerson} por pessoa**.\n\n' +
+        'O take-away custa facilmente 18 € por pessoa. Um jantar Nuvou completo (prato, arroz e salada) custa **{perPerson} por pessoa**.\n\n' +
         'Como? Sem segredos: ingredientes simples e inteiros, como feijão, grão, lentilhas e cereais, cozinhados por quem os sabe tornar deliciosos. Comer bem não tem de custar uma fortuna. Muitas vezes, o que custa caro é o processado.',
-      takeaway: takeaway(['Hambúrguer ×4', 'Batatas ×4', 'Taxa de entrega', 'Taxa de serviço']),
+      takeaway: takeaway(['Hambúrguer ×4', 'Batatas ×4', 'Taxa de serviço']),
+      nuvouReceipt: { main: 'Caril de grão', rice: 'Arroz integral', salad: 'Salada de quinoa' },
     },
     kids: {
       eyebrow: 'Aprovado pelos miúdos',
       title: 'O teste mais difícil *que há.*',
       text:
         'Sejamos honestos: aos olhos de uma criança, nenhuma refeição saudável ganha a um hambúrguer com refrigerante. Há milhares de milhões em marketing a garantir isso.\n\n' +
-        'Mas as nossas receitas passam no teste mais difícil que há: os três filhos da Vivi. Comem, alguns pratos já se tornaram verdadeiros favoritos, e os amigos deles pedem para repetir. Se não passa no teste dos miúdos, não entra no menu. Comida de conforto que lhes faz bem.',
+        'Mas as nossas receitas passam no teste mais difícil que há: os três filhos da Vivi. Comem, alguns pratos já se tornaram verdadeiros favoritos, e os amigos deles pedem para repetir. Comida de conforto que lhes faz bem.',
       stamp: 'Aprovado pelos miúdos ✓',
     },
     healthy: {
@@ -373,16 +375,17 @@ export const homePage = {
       eyebrow: 'Cheaper',
       title: 'Better than takeaway. *For a fraction of the price.*',
       text:
-        'Takeaway easily costs €18–20 per person. A complete Nuvou dinner (main dish, rice and salad) costs **{perPerson} per person**.\n\n' +
+        'Takeaway easily costs €18 per person. A complete Nuvou dinner (main dish, rice and salad) costs **{perPerson} per person**.\n\n' +
         "How? No secret: simple, whole ingredients like beans, chickpeas, lentils and grains, cooked by people who know how to make them delicious. Eating well doesn't have to cost a fortune. Often it's the processed stuff that does.",
-      takeaway: takeaway(['Burger ×4', 'Fries ×4', 'Delivery fee', 'Service fee']),
+      takeaway: takeaway(['Burger ×4', 'Fries ×4', 'Service fee']),
+      nuvouReceipt: { main: 'Chickpea curry', rice: 'Brown rice', salad: 'Quinoa salad' },
     },
     kids: {
       eyebrow: 'Kid-approved',
       title: 'The toughest test *there is.*',
       text:
         "Let's be honest: in a child's eyes, no healthy meal beats a burger and a soda. Billions in marketing make sure of that.\n\n" +
-        "But our recipes pass the toughest test there is: Vivi's three kids. They eat it, some dishes have become real favourites, and their friends ask for more. If it doesn't pass the kids, it isn't on the menu. Comfort food that does them good.",
+        "But our recipes pass the toughest test there is: Vivi's three kids. They eat it, some dishes have become real favourites, and their friends ask for more. Comfort food that does them good.",
       stamp: 'Kid-approved ✓',
     },
     healthy: {
