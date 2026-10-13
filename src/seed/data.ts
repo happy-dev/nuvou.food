@@ -228,3 +228,199 @@ export const sampleRecipes: SampleRecipe[] = [
     },
   },
 ]
+
+// Home page images. Food photos are Unsplash stand-ins until Vivi's own;
+// people photos come from the private inputs/ folder (skipped if missing).
+type HomeImage = { alt: { pt: string; en: string } } & ({ unsplashId: string } | { file: string })
+
+export const homeImages = {
+  hero: {
+    unsplashId: '1512621776951-a57141f2eefd',
+    alt: { pt: 'Taça de legumes frescos, cereais e leguminosas', en: 'A bowl of fresh vegetables, grains and legumes' },
+  },
+  faster: {
+    unsplashId: '1654199903998-e49181b41a95',
+    alt: { pt: 'Caril de grão-de-bico numa taça', en: 'Chickpea curry in a bowl' },
+  },
+  kids: {
+    unsplashId: '1779119867390-c64f66cd02b8',
+    alt: { pt: 'Prato de feijão estufado', en: 'A plate of stewed beans' },
+  },
+  story: {
+    file: 'inputs/photos/vivi-and-alex/WhatsApp Image 2026-10-09 at 08.39.41.jpeg',
+    alt: { pt: 'A Vivi e o Alex, ao sol', en: 'Vivi and Alex in the sun' },
+  },
+  tome: { file: 'inputs/photos/testemonials/tomé-mayrink.png', alt: { pt: 'Tomé', en: 'Tomé' } },
+  bibiana: { file: 'inputs/photos/testemonials/bibiana-de-sá.png', alt: { pt: 'Bibiana de Sá', en: 'Bibiana de Sá' } },
+  antonio: { file: 'inputs/photos/testemonials/antónio-nozes.png', alt: { pt: 'António Nozes', en: 'António Nozes' } },
+} satisfies Record<string, HomeImage>
+
+export type HomeImageKey = keyof typeof homeImages
+
+// Home page copy (inputs/notes/COPY.md, Part 2). Markup: *highlight*,
+// **bold**, {placeholders} (src/lib/copy.ts). Images are set by the seed.
+// Tomé is a minor: first name only. His photo is shown with his mother Vivi's consent.
+const testimonials = (quotes: [string, string, string]) =>
+  [
+    { quote: quotes[0], name: 'Tomé', photo: 'tome' },
+    { quote: quotes[1], name: 'Bibiana de Sá', photo: 'bibiana' },
+    { quote: quotes[2], name: 'António Nozes', photo: 'antonio' },
+  ] as { quote: string; name: string; photo: HomeImageKey | null }[]
+
+const takeaway = (items: [string, string, string, string]) =>
+  [52, 14, 3.99, 5.9].map((amount, i) => ({ item: items[i], amount }))
+
+export const homePage = {
+  pt: {
+    hero: {
+      headline: 'Comida feita em casa. *Sem a chatice.* Que cabe no teu bolso.',
+      subtitle:
+        'Refeições caseiras, ricas em proteína e sem aditivos, da nossa cozinha para a tua. Pratos e arroz entregues congelados, saladas feitas nessa manhã. Jantar em minutos. Aprovado pelos miúdos.',
+    },
+    howItWorks: {
+      title: 'Três passos. *Zero tachos.*',
+      steps: [
+        { title: 'Escolhe', text: 'Escolhe as refeições e o tamanho das porções.' },
+        {
+          title: 'Recebe',
+          text: 'Encomenda até às {cutoff} e entregamos no dia, entre as {windowStart} e as {windowEnd}, de segunda a sexta.',
+        },
+        { title: 'Aquece e saboreia', text: 'Aquece o prato, tempera a salada: o jantar está na mesa em minutos.' },
+      ],
+    },
+    faster: {
+      eyebrow: 'Mais rápido',
+      title: 'Pronto em *minutos*',
+      text: 'Nós cozinhamos (horas a fio) para que tu não tenhas de o fazer. Guarda umas refeições no congelador e o jantar deixa de ser um problema.',
+    },
+    cheaper: {
+      eyebrow: 'Mais barato',
+      title: 'Melhor do que o take-away. *Por uma fração do preço.*',
+      text:
+        'O take-away custa facilmente 18–20 € por pessoa. Um jantar Nuvou completo (prato, arroz e salada) custa **{perPerson} por pessoa**.\n\n' +
+        'Como? Sem segredos: ingredientes simples e inteiros, como feijão, grão, lentilhas e cereais, cozinhados por quem os sabe tornar deliciosos. Comer bem não tem de custar uma fortuna. Muitas vezes, o que custa caro é o processado.',
+      takeaway: takeaway(['Hambúrguer ×4', 'Batatas ×4', 'Taxa de entrega', 'Taxa de serviço']),
+    },
+    kids: {
+      eyebrow: 'Aprovado pelos miúdos',
+      title: 'O teste mais difícil *que há.*',
+      text:
+        'Sejamos honestos: aos olhos de uma criança, nenhuma refeição saudável ganha a um hambúrguer com refrigerante. Há milhares de milhões em marketing a garantir isso.\n\n' +
+        'Mas as nossas receitas passam no teste mais difícil que há: os três filhos da Vivi. Comem, alguns pratos já se tornaram verdadeiros favoritos, e os amigos deles pedem para repetir. Se não passa no teste dos miúdos, não entra no menu. Comida de conforto que lhes faz bem.',
+      stamp: 'Aprovado pelos miúdos ✓',
+    },
+    healthy: {
+      eyebrow: 'Saudável',
+      title: 'Nós tratamos *da nutrição.*',
+      wholeFoodTitle: '100% ingredientes naturais, zero aditivos',
+      wholeFoodText:
+        'Só ingredientes que reconheces da tua cozinha. Sem conservantes, sem intensificadores de sabor, sem "E-qualquer-coisa". **O congelador é o nosso único conservante.**',
+      balancedTitle: 'Rica em proteína e equilibrada',
+      balancedText:
+        'Somos nerds da nutrição. Cada refeição é pensada para equilibrar proteínas, hidratos de carbono e gorduras saudáveis. Também temos em conta as vitaminas, os minerais e os ómega-3, garantindo que cada ingrediente contribui para o bom funcionamento do teu corpo, em vez de o prejudicar. Cada prato apresenta os valores nutricionais e os seus benefícios: ossos fortes, sangue saudável e muito mais.',
+    },
+    planet: {
+      eyebrow: 'Leve para o planeta',
+      text: 'Uma refeição média em Portugal emite 3 kg de CO₂. As nossas refeições são 100% plant-based e emitem cerca de 4 vezes menos.*',
+      averageKg: 3,
+      oursKg: 0.7,
+      footnote:
+        '*Média de 92 refeições habitualmente consumidas em Portugal: 3,0 kg CO₂e por pessoa. Refeições plant-based no mesmo estudo: 0,6–0,7 kg. Mesquita & Carvalho, The International Journal of Life Cycle Assessment, 2023.',
+    },
+    mostOrdered: { title: 'Os mais *pedidos*' },
+    story: {
+      eyebrow: 'A nossa história',
+      title: 'Feito em família, *para a tua mesa.*',
+      text: 'Somos a Vivi e o Alex. Há três anos que cozinhamos em grande para a nossa família. Agora cozinhamos também para ti.',
+    },
+    testimonials: {
+      title: 'O que diz *quem já comeu?*',
+      items: testimonials([
+        'Os meus amigos da escola gostam tanto da nossa comida que eles me pagam bebidas em troca de um bocado dela.',
+        'Melhor húmus da minha vida.',
+        'Eu amo o húmus e os Dahl mesmo!',
+      ]),
+    },
+    finalCall: {
+      smallPrint:
+        'Não sabes se entregamos na tua zona? Encomenda na mesma. Se não conseguirmos lá chegar, devolvemos-te o valor total. E se houver vizinhos suficientes a pedir, passamos a ir.',
+      title: 'Hoje à noite, *o jantar já está feito.*',
+    },
+  },
+  en: {
+    hero: {
+      headline: 'Home-cooked food. *None of the hassle.* Easy on your budget.',
+      subtitle:
+        'Whole-food, protein-rich meals with zero additives, from our kitchen to yours. Main dishes and rice delivered frozen, salads made fresh that morning. Dinner in minutes. Kid-approved.',
+    },
+    howItWorks: {
+      title: 'Three steps. *Zero pots.*',
+      steps: [
+        { title: 'Choose', text: 'Pick your meals and portion sizes.' },
+        {
+          title: 'Receive',
+          text: 'Order before {cutoff} and we deliver the same day, between {windowStart} and {windowEnd}, Monday to Friday.',
+        },
+        { title: 'Heat and enjoy', text: "Heat the main dish, season the salad: dinner's on the table in minutes." },
+      ],
+    },
+    faster: {
+      eyebrow: 'Faster',
+      title: 'Ready in *minutes*',
+      text: "We do the cooking (hours of it) so you don't have to. Keep a few meals in the freezer and dinner is never a problem again.",
+    },
+    cheaper: {
+      eyebrow: 'Cheaper',
+      title: 'Better than takeaway. *For a fraction of the price.*',
+      text:
+        'Takeaway easily costs €18–20 per person. A complete Nuvou dinner (main dish, rice and salad) costs **{perPerson} per person**.\n\n' +
+        "How? No secret: simple, whole ingredients like beans, chickpeas, lentils and grains, cooked by people who know how to make them delicious. Eating well doesn't have to cost a fortune. Often it's the processed stuff that does.",
+      takeaway: takeaway(['Burger ×4', 'Fries ×4', 'Delivery fee', 'Service fee']),
+    },
+    kids: {
+      eyebrow: 'Kid-approved',
+      title: 'The toughest test *there is.*',
+      text:
+        "Let's be honest: in a child's eyes, no healthy meal beats a burger and a soda. Billions in marketing make sure of that.\n\n" +
+        "But our recipes pass the toughest test there is: Vivi's three kids. They eat it, some dishes have become real favourites, and their friends ask for more. If it doesn't pass the kids, it isn't on the menu. Comfort food that does them good.",
+      stamp: 'Kid-approved ✓',
+    },
+    healthy: {
+      eyebrow: 'Healthy',
+      title: 'We take care *of the nutrition.*',
+      wholeFoodTitle: '100% whole food, zero additives',
+      wholeFoodText:
+        "Only ingredients you'd recognise in your own kitchen. No preservatives, no flavour enhancers, no E-numbers. **The freezer is our only preservative.**",
+      balancedTitle: 'Protein-rich and balanced',
+      balancedText:
+        "We're nutrition nerds. Every meal is built to balance protein, carbohydrates and good fats. We also check vitamins, minerals and omega-3, and make sure they work for your body and not against it. Every dish shows the numbers, and what it's good for: strong bones, healthy blood and more.",
+    },
+    planet: {
+      eyebrow: 'Light on the planet',
+      text: 'An average meal in Portugal emits 3 kg of CO₂. Our meals are 100% plant-based and emit about 4 times less.*',
+      averageKg: 3,
+      oursKg: 0.7,
+      footnote:
+        '*Average of 92 meals commonly eaten in Portugal: 3.0 kg CO₂e per person. Plant-based meals in the same study: 0.6–0.7 kg. Mesquita & Carvalho, The International Journal of Life Cycle Assessment, 2023.',
+    },
+    mostOrdered: { title: 'Most *ordered*' },
+    story: {
+      eyebrow: 'Our story',
+      title: 'Made by a family, *for your table.*',
+      text: "We're Vivi and Alex. For three years, we've batch-cooked for our own family. Now we cook for you too.",
+    },
+    testimonials: {
+      title: "What people *who've eaten it* say",
+      items: testimonials([
+        'My friends from school like our food so much that they buy me drinks in exchange for some of it.',
+        'Best hummus of my life.',
+        'I really love the hummus and the dahl!',
+      ]),
+    },
+    finalCall: {
+      smallPrint:
+        "Not sure we deliver to you? Order anyway. If we can't get there, we refund you in full, and if enough neighbours ask, we'll start coming.",
+      title: "Tonight, *dinner's already done.*",
+    },
+  },
+}

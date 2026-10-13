@@ -4,14 +4,59 @@
     "description": "Dinner ready in minutes, for a fraction of the price of takeaway: home-cooked, protein-rich meals with zero additives. Same-day delivery."
   },
   "Nav": {
+    "home": "Nuvou, home page",
     "menu": "Menu",
     "about": "About us",
     "cart": "Cart ({count})",
-    "switchLanguage": "Português"
+    "switchLanguage": "Português",
+    "switchLanguageLabel": "Ver o site em português"
+  },
+  "TopBar": {
+    "sameDay": "Order before {cutoff} · same-day delivery {start}–{end} · {days}",
+    "today": "Order before {cutoff} · delivered today {start}–{end} · {days}",
+    "later": "Order now · delivered {day}, {start}–{end}",
+    "tomorrow": "tomorrow"
   },
   "Home": {
-    "headline": "Home-cooked food. <em>None of the hassle.</em> Easy on your budget.",
-    "subtitle": "Whole-food, protein-rich meals with zero additives, from our kitchen to yours. Main dishes and rice delivered frozen, salads made fresh that morning. Dinner in minutes. Kid-approved.",
-    "comingSoon": "The site is still cooking. Come back soon!"
+    "notFilledIn": "The Home page has no content yet: fill it in at /admin → Home page (or run npm run seed).",
+    "seeMenu": "See the menu",
+    "howItWorks": "How it works",
+    "perPerson": "per person",
+    "seeFullMenu": "See the full menu →",
+    "ourStory": "Our story →",
+    "receipts": {
+      "takeaway": "TAKEAWAY",
+      "nuvou": "NUVOU",
+      "dividedBy": "÷ {count} people",
+      "perPerson": "/ person"
+    },
+    "macros": {
+      "label": "Share of energy",
+      "protein": "Protein",
+      "carbs": "Carbs",
+      "fat": "Fat",
+      "example": "Example: {name}"
+    },
+    "carbon": {
+      "average": "Average meal in Portugal",
+      "ours": "Nuvou"
+    },
+    "delivery": {
+      "fromPerPerson": "Complete dinner from {price} per person",
+      "sameDay": "Same-day delivery",
+      "schedule": "{days}, {start}–{end}",
+      "freeOver": "Free delivery over {threshold} (otherwise {fee})"
+    }
+  },
+  "Product": {
+    "featured": "Featured",
+    "from": "from {price}",
+    "types": { "main": "Main dish", "rice": "Rice", "salad": "Salad" },
+    "sizesShort": { "small": "S", "medium": "M", "large": "L" }
+  },
+  "Footer": {
+    "tagline": "Boa vida na comida",
+    "questions": "Questions?",
+    "instagram": "Instagram"
   }
 }

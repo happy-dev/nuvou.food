@@ -3,6 +3,7 @@ import { slugField, type CollectionConfig } from 'payload'
 import { anyone, isAdmin } from '@/access'
 import { productTypeOptions } from '@/fields/productTypes'
 import { sizeNumberFields } from '@/fields/sizes'
+import { revalidateHooks } from '@/hooks/revalidateSite'
 import { slugify } from '@/lib/slugify'
 
 const isMain = (data: { type?: string } | undefined) => data?.type === 'main'
@@ -18,6 +19,8 @@ export const Recipes: CollectionConfig = {
     group: 'Menu',
   },
   access: { read: anyone, create: isAdmin, update: isAdmin, delete: isAdmin },
+  // Also runs when the stock log changes a recipe's stock.
+  hooks: revalidateHooks,
   fields: [
     {
       type: 'row',

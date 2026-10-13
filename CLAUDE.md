@@ -20,7 +20,7 @@ The site has 3 pages: **Home, Shop (with product pages), About us**. It's biling
 
 ## Code map and commands
 - **Node 24** (`.nvmrc`), **npm**. On Alex's Mac, run commands through fnm: `fnm exec --using=24 npm run dev`. Secrets live in `.env.local` (git-ignored, see `.env.example`).
-- `npm run dev` · `npm run build` · `npm run lint` · `npm test` (Vitest, `src/**/*.test.ts`) · `npm run seed` (dev database only; never overwrites Site settings or health tags, add `-- --reset-settings` to force the settings) · `npm run generate:types` (after changing collections) · `npm run generate:importmap` (after adding admin components).
+- `npm run dev` · `npm run build` · `npm run lint` · `npm test` (Vitest, `src/**/*.test.ts`) · `npm run seed` (dev database only; never overwrites Site settings, health tags or the Home page copy; force them with `SEED_RESET=settings,home npm run seed`) · `npm run generate:types` (after changing collections) · `npm run generate:importmap` (after adding admin components).
 - **Before declaring a step done:** `npm test`, `npm run lint` and `npm run build` pass.
 - **Dependencies are pinned to exact versions** (`save-exact=true` in `.npmrc`): upgrade deliberately, all `@payloadcms/*` packages together. Run `npm audit` before going live and after each Payload/Next.js upgrade. Known leftovers on 2026-10-12: dev/build-only tools (braces, sass, chokidar, esbuild, drizzle-kit) and `undici` inside Payload 3.90.2, waiting for upstream fixes.
 
@@ -32,11 +32,16 @@ src/
   collections/           one file per Payload collection (Recipes, StockMovements, Ingredients, Units, Nutrients,
                          HealthTags, Media, Users)
   components/admin/      custom admin UI: StepperField (−/+), IngredientUnit (read-only unit), PlainTextCell
-  globals/               Payload globals (SiteSettings)
-  fields/                reusable field builders (sizes.ts: S/M/L number rows)
+  components/site/       shared site UI: TopBar, Header, LanguageSwitch, Footer, ProductCard, CmsImage, Copy (renders copy markup)
+  components/home/       Home page sections (Hero, HowItWorks, Promises, Cheaper, MostOrdered, Story, Testimonials, FinalCall)
+  data/                  site.ts: the only place pages read Payload (Local API, overrideAccess: false, React cache())
+  globals/               Payload globals (SiteSettings, HomePage)
+  fields/                reusable field builders (sizes.ts: S/M/L number rows; copy.ts: localized copy text with markup check)
+  hooks/                 revalidateSite.ts: rebuilds the pre-rendered pages when shown content changes
   access/                reusable access rules (anyone, isAdmin)
-  lib/                   pure business logic + tests: pricing.ts, delivery.ts, stock.ts, healthTags.ts, slugify.ts; settings.ts maps
-                         the SiteSettings document to their inputs. No Payload calls here.
+  lib/                   pure business logic + tests: pricing.ts, delivery.ts, stock.ts, healthTags.ts, menu.ts (what to show,
+                         in which order), copy.ts (copy markup), format.ts (times, days, amounts per language), slugify.ts;
+                         settings.ts maps the SiteSettings document to their inputs. No Payload calls here.
   seed/                  npm run seed: real settings + sample recipes (slug "exemplo-…", safe to re-run)
   i18n/                  routing.ts (locales, localized URLs), request.ts, navigation.ts (use its Link)
   proxy.ts               language detection and redirects (Next.js 16's name for middleware)
@@ -46,7 +51,11 @@ public/brand/              logo files
 ```
 
 ## Architecture
-*Built so far: step 1 (Next.js + Payload + Postgres, PT/EN routing, design tokens, temporary page) and step 2 (`SiteSettings`, `Recipes`, stock log, ingredients/units/nutrients/health tags, localized `Media`, pricing/delivery/stock/tag logic with tests, seed). Everything else below is still planned.*
+*Built so far: step 1 (Next.js + Payload + Postgres, PT/EN routing, design tokens), step 2 (`SiteSettings`, `Recipes`, stock log, ingredients/units/nutrients/health tags, localized `Media`, pricing/delivery/stock/tag logic with tests, seed) and step 3 (Home page, `HomePage` global, top bar, header, footer). Everything else below is still planned.*
+
+- **Copy markup:** marketing texts edited in `/admin` use `*highlight*` (Fraunces italic in titles), `**bold**`, blank lines for paragraphs, and `{placeholders}` for figures from Site settings (`{perPerson}`, `{cutoff}`, `{freeOver}`…, listed in `src/lib/copy.ts`). Never type a price or time in copy: use a placeholder. Copy fields are built with `copyField()` (`src/fields/copy.ts`), which refuses unknown placeholders.
+- **Rendering:** public pages are pre-rendered (static), and rebuilt on the next visit when content they show changes: collections and globals the site displays get the hooks in `src/hooks/revalidateSite.ts`. Anything that depends on the visitor's clock (the top bar's "today/tomorrow") is computed in the browser.
+- **Data access:** pages read content only through `src/data/site.ts`, never by calling Payload directly.
 
 - **Vocabulary in code, values in the admin:** the lists that shape the data model and the code's behaviour (sizes `SIZES`, product types `PRODUCT_TYPES`, stock reasons `STOCK_REASONS`) are declared once in `src/lib/`; admin fields are generated from them (`src/fields/`). Lists Vivi and Alex grow themselves (units, ingredients, nutrients, health tags) are collections. Values (prices, portions, stock, texts) live in the database and are edited in `/admin`. Never re-type these lists elsewhere.
 - **Money:** prices are entered in euros in the admin; all arithmetic is done in integer cents (`src/lib/pricing.ts`). Never compute prices with floating-point euros.
@@ -70,7 +79,7 @@ public/brand/              logo files
   - **`Units`** (internal, Portuguese, admins only), **`Ingredients`** (localized name shown on the site + its unit, admins-only field), **`Nutrients`** (localized name + optional localized benefit, shown on the site): reference lists edited in `/admin`, sidebar group "Ingredients & nutrition". Consistent ingredients and units make a future shopping list possible.
   - **`HealthTags`:** localized name, the nutrients that trigger it (relationship), explanation, emoji icon. **A recipe shows a tag when at least one of its notable nutrients is among the tag's nutrients** (`inferHealthTags` in `src/lib/healthTags.ts`).
   - **`Orders`** *(Phase 5, with Payload's ecommerce plugin)***:** written by the Stripe webhook. Status is paid, delivered, or refunded – outside area.
-  - **Globals `HomePage` and `AboutPage`** *(step 3, built together with those pages)* (a Payload "global" is a single document, unlike a collection): the localized marketing copy and images of those pages, editable in `/admin` without a deploy. Interface text (buttons, labels, errors) lives in next-intl message files (`messages/pt.json`, `messages/en.json`).
+  - **Globals `HomePage`** (built) **and `AboutPage`** *(step 5)* (a Payload "global" is a single document, unlike a collection): the localized marketing copy and images of those pages, editable in `/admin` without a deploy. Fixed sections with fixed fields, one tab per section; the layout and section order stay in code. Testimonials are an array in `HomePage` (quote in its original language, translated in the other locale). Interface text (buttons, labels, errors) lives in next-intl message files (`messages/pt.json`, `messages/en.json`).
   - **`Media`** and **`Users`** (admins).
 - **Checkout:**
   1. The client-side cart is sent to a server action, which re-prices it from the database.
@@ -89,7 +98,7 @@ public/brand/              logo files
 - **Home "Most ordered":** products of every type (main dishes, rice, salads), **in stock only**. Products marked **"featured"** in `/admin` come first (for example, a signature quinoa salad), then the rest by number of paid orders.
 - **Abuse protection:** every server action that sends an email or creates a checkout session goes through the same guard: Turnstile check, honeypot and timing check, rate limit, and schema validation. Never add an email-sending endpoint without it.
 - **Customer accounts are optional.** Guest checkout sits next to "Continue with Google" and an emailed sign-in link. Orders are linked by email, so "My orders" also shows orders placed as a guest.
-- **Seed script** (`npm run seed`, dev only): loads the real site settings, health tags and sample recipes (slug `exemplo-…`, name "(exemplo)") with stand-in Unsplash photos. Re-runnable: it only deletes items prefixed `exemplo-`. Real recipes replace the samples after Phase 2.
+- **Seed script** (`npm run seed`, dev only): loads the real site settings, health tags, the Home page copy (with stand-in food photos, and people photos from `inputs/` when present) and sample recipes (slug `exemplo-…`, name "(exemplo)") with stand-in Unsplash photos. Re-runnable: it only deletes items prefixed `exemplo-`. Real recipes replace the samples after Phase 2.
 
 ## Decisions
 
@@ -126,6 +135,7 @@ public/brand/              logo files
 | 2026-10-12 | **Stock log** (`StockMovements`): stock changes only through entries (add/remove × production, loss, own use, correction), never by editing a number. Entries are immutable; deleting one reverses it | Matches how Vivi and Alex pack: they fill whatever containers they have (e.g. medium when large ones run out). Gives a history and losses (salads keep 5 days), and prevents an open recipe form from overwriting a newer stock figure |
 | 2026-10-12 | **No per-recipe carbon figure** for now: one site-wide estimate (the study-based "about 4× less"). Nutrition is stored **per recipe as percentages** only; no per-portion values, so no "portions per batch" field | Percentages are the same for a batch or a portion. Per-recipe carbon will come later |
 | 2026-10-13 | **Ingredients, units and nutrients are admin-managed lists.** Recipes pick ingredients (autocomplete, create on the fly) and enter a quantity (−/+ by 1); the unit is the ingredient's, shown read-only. Recipes tick **notable nutrients**; **health tags are inferred** from them (a tag's nutrients ∩ the recipe's) | Consistent names and units enable a shopping list later. Nutrients are typed once and shared by recipes and tags, so nothing is duplicated or spelled differently |
+| 2026-10-13 | **Home copy in a `HomePage` global with fixed fields** (no page builder), **figures as `{placeholders}`** filled from Site settings, and **pre-rendered pages rebuilt when content changes** (the top bar's delivery day computed in the browser). Whole-euro prices are shown without cents ("5 €", "€30") | Words are editable without a deploy while the layout stays designed. Copy can never contradict the shop's prices or times. Static pages are fast and spare the free database tier |
 | — | Open: logo variant (Vivi; the rosa/marrom logo is used meanwhile, SVGs to come), hosting (free or one cheap multi-app server) | To decide later |
 
 ## Known gaps (deferred on purpose; resolve before the public launch)

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { toDeliverySettings } from './settings'
+import { toCopyValues, toDeliverySettings } from './settings'
 
 const base = {
   portions: { small: 1, medium: 4, large: 7 },
@@ -13,7 +13,19 @@ const base = {
   freeDeliveryThreshold: 30,
   deliveryDays: ['1', '2', '3', '4', '5'] as ('1' | '2' | '3' | '4' | '5')[],
   sameDayCutoff: '16:30',
+  windowStart: '17:00',
+  windowEnd: '20:30',
 }
+
+describe('toCopyValues', () => {
+  it('formats the Site settings figures for the copy placeholders', () => {
+    const values = toCopyValues({ ...base, closedDates: null }, 'pt')
+    expect(values).toMatchObject({ cutoff: '16h30', windowStart: '17h00', windowEnd: '20h30', days: 'seg. a sex.' })
+    expect(values.perPerson).toMatch(/^4,75\s€$/)
+    expect(values.freeOver).toMatch(/^30\s€$/)
+    expect(toCopyValues({ ...base, closedDates: null }, 'en')).toMatchObject({ perPerson: '€4.75', deliveryFee: '€5' })
+  })
+})
 
 describe('toDeliverySettings', () => {
   it('turns stored timestamps into Lisbon calendar days, whatever time Payload stored', () => {

@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone, isAdmin } from '@/access'
+import { revalidateHooks } from '@/hooks/revalidateSite'
 
 // Ingredients, entered once and reused by every recipe, each with its unit.
 // Consistent names and units are what make a shopping list possible later.
@@ -15,6 +16,7 @@ export const Ingredients: CollectionConfig = {
     description: 'Every ingredient once, with the unit you measure it in. Recipes pick from this list.',
   },
   access: { read: anyone, create: isAdmin, update: isAdmin, delete: isAdmin },
+  hooks: revalidateHooks,
   defaultSort: 'name',
   fields: [
     {

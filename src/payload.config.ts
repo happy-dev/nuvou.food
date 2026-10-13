@@ -13,6 +13,7 @@ import { Recipes } from './collections/Recipes'
 import { StockMovements } from './collections/StockMovements'
 import { Units } from './collections/Units'
 import { Users } from './collections/Users'
+import { HomePage } from './globals/HomePage'
 import { SiteSettings } from './globals/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
@@ -40,7 +41,7 @@ export default buildConfig({
   },
   // The order here is the order in the admin sidebar, within each group.
   collections: [Recipes, StockMovements, Ingredients, Units, Nutrients, HealthTags, Media, Users],
-  globals: [SiteSettings],
+  globals: [SiteSettings, HomePage],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

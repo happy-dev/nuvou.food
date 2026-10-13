@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone, isAdmin } from '@/access'
+import { revalidateHooks } from '@/hooks/revalidateSite'
 
 // Uploaded images (dish photos, testimonials, About us). Public to read, so the
 // site can show them; only admins can upload or change them. Next.js's <Image>
@@ -8,6 +9,7 @@ import { anyone, isAdmin } from '@/access'
 export const Media: CollectionConfig = {
   slug: 'media',
   access: { read: anyone, create: isAdmin, update: isAdmin, delete: isAdmin },
+  hooks: revalidateHooks,
   fields: [
     {
       name: 'alt',

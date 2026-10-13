@@ -67,10 +67,11 @@ export function remainingForFreeDeliveryInCents(subtotalCents: number, settings:
   return Math.max(0, toCents(settings.freeDeliveryThreshold) - subtotalCents)
 }
 
-/** "4,75 €" in Portuguese, "€4.75" in English. */
+/** "4,75 €" in Portuguese, "€4.75" in English. Whole euros drop the cents: "5 €", "€30". */
 export function formatPrice(cents: number, locale: 'pt' | 'en'): string {
   return new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-IE', {
     style: 'currency',
     currency: 'EUR',
+    minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
   }).format(cents / 100)
 }

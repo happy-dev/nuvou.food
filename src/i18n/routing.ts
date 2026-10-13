@@ -18,6 +18,7 @@ export const routing = defineRouting({
   pathnames: {
     '/': '/',
     '/menu': '/menu',
+    '/menu/[slug]': '/menu/[slug]', // product pages (step 4)
     '/about': {
       pt: '/sobre-nos',
       en: '/about',

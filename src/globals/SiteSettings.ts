@@ -3,6 +3,7 @@ import type { GlobalConfig } from 'payload'
 import { anyone, isAdmin } from '@/access'
 import { PRODUCT_TYPE_LABELS } from '@/fields/productTypes'
 import { sizeNumberFields } from '@/fields/sizes'
+import { revalidateGlobal } from '@/hooks/revalidateSite'
 import { PRODUCT_TYPES } from '@/lib/pricing'
 
 const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/
@@ -15,6 +16,7 @@ export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
   label: 'Site settings',
   access: { read: anyone, update: isAdmin },
+  hooks: { afterChange: [revalidateGlobal] },
   fields: [
     {
       type: 'tabs',

@@ -101,9 +101,11 @@ export interface Config {
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('pt' | 'en') | ('pt' | 'en')[];
   globals: {
     'site-settings': SiteSetting;
+    'home-page': HomePage;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'home-page': HomePageSelect<false> | HomePageSelect<true>;
   };
   locale: 'pt' | 'en';
   widgets: {
@@ -768,6 +770,136 @@ export interface SiteSetting {
   createdAt?: string | null;
 }
 /**
+ * Text markup: *words* = highlighted (italic in titles), **words** = bold, a blank line = new paragraph. Never type prices or times: use a placeholder and the site fills in the value from Site settings: {perPerson} complete dinner per person (main + rice + salad, size M), {deliveryFee} delivery fee, {freeOver} free delivery from, {cutoff} same-day cut-off time, {windowStart} delivery window start, {windowEnd} delivery window end, {days} delivery days.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page".
+ */
+export interface HomePage {
+  id: number;
+  hero: {
+    /**
+     * Wrap the words to highlight in *stars*.
+     */
+    headline: string;
+    subtitle: string;
+    /**
+     * Food photo behind the brand block. Wide, landscape.
+     */
+    image?: (number | null) | Media;
+  };
+  howItWorks: {
+    title: string;
+    steps?:
+      | {
+          title: string;
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  faster: {
+    /**
+     * Short label; the site numbers it.
+     */
+    eyebrow: string;
+    title: string;
+    text: string;
+    image?: (number | null) | Media;
+  };
+  cheaper: {
+    /**
+     * Short label; the site numbers it.
+     */
+    eyebrow: string;
+    title: string;
+    text: string;
+    /**
+     * A typical family takeaway order, for the receipts visual. The Nuvou receipt is computed from the default prices (size M), and both are divided by the M portions.
+     */
+    takeaway?:
+      | {
+          item: string;
+          amount: number;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  kids: {
+    /**
+     * Short label; the site numbers it.
+     */
+    eyebrow: string;
+    title: string;
+    text: string;
+    /**
+     * The round stamp, e.g. "Aprovado pelos miúdos ✓".
+     */
+    stamp: string;
+    image?: (number | null) | Media;
+  };
+  healthy: {
+    /**
+     * Short label; the site numbers it.
+     */
+    eyebrow: string;
+    title: string;
+    wholeFoodTitle: string;
+    wholeFoodText: string;
+    balancedTitle: string;
+    /**
+     * Shown with the nutrition bar and health tags of a featured recipe.
+     */
+    balancedText: string;
+  };
+  planet: {
+    eyebrow: string;
+    /**
+     * End with * to point to the footnote.
+     */
+    text: string;
+    averageKg: number;
+    oursKg: number;
+    footnote: string;
+  };
+  mostOrdered: {
+    title: string;
+  };
+  story: {
+    eyebrow: string;
+    title: string;
+    text: string;
+    image?: (number | null) | Media;
+  };
+  testimonials: {
+    title: string;
+    items?:
+      | {
+          /**
+           * In the language it was said; the other language version shows the translation.
+           */
+          quote: string;
+          name: string;
+          /**
+           * Optional, e.g. "9 anos". For a child: first name and age only.
+           */
+          detail?: string | null;
+          /**
+           * Optional, square. A child’s photo needs a parent’s consent.
+           */
+          photo?: (number | null) | Media;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  finalCall: {
+    smallPrint: string;
+    title: string;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
@@ -823,6 +955,117 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   storageSalad?: T;
   contactEmail?: T;
   instagramUrl?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page_select".
+ */
+export interface HomePageSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        headline?: T;
+        subtitle?: T;
+        image?: T;
+      };
+  howItWorks?:
+    | T
+    | {
+        title?: T;
+        steps?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              id?: T;
+            };
+      };
+  faster?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        text?: T;
+        image?: T;
+      };
+  cheaper?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        text?: T;
+        takeaway?:
+          | T
+          | {
+              item?: T;
+              amount?: T;
+              id?: T;
+            };
+      };
+  kids?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        text?: T;
+        stamp?: T;
+        image?: T;
+      };
+  healthy?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        wholeFoodTitle?: T;
+        wholeFoodText?: T;
+        balancedTitle?: T;
+        balancedText?: T;
+      };
+  planet?:
+    | T
+    | {
+        eyebrow?: T;
+        text?: T;
+        averageKg?: T;
+        oursKg?: T;
+        footnote?: T;
+      };
+  mostOrdered?:
+    | T
+    | {
+        title?: T;
+      };
+  story?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        text?: T;
+        image?: T;
+      };
+  testimonials?:
+    | T
+    | {
+        title?: T;
+        items?:
+          | T
+          | {
+              quote?: T;
+              name?: T;
+              detail?: T;
+              photo?: T;
+              id?: T;
+            };
+      };
+  finalCall?:
+    | T
+    | {
+        smallPrint?: T;
+        title?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

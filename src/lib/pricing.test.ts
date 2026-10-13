@@ -74,4 +74,10 @@ describe('formatPrice', () => {
     expect(formatPrice(475, 'pt')).toMatch(/^4,75\s€$/)
     expect(formatPrice(475, 'en')).toBe('€4.75')
   })
+
+  it('drops the cents for whole euros', () => {
+    expect(formatPrice(500, 'pt')).toMatch(/^5\s€$/)
+    expect(formatPrice(3000, 'en')).toBe('€30')
+    expect(formatPrice(450, 'en')).toBe('€4.50')
+  })
 })

@@ -4,14 +4,59 @@
     "description": "Jantar pronto em minutos, por uma fração do preço do take-away: refeições caseiras, ricas em proteína e sem aditivos. Entrega no próprio dia."
   },
   "Nav": {
+    "home": "Nuvou, página inicial",
     "menu": "Menu",
     "about": "Sobre nós",
     "cart": "Carrinho ({count})",
-    "switchLanguage": "English"
+    "switchLanguage": "English",
+    "switchLanguageLabel": "View the site in English"
+  },
+  "TopBar": {
+    "sameDay": "Encomenda até às {cutoff} · entrega no próprio dia entre as {start} e as {end} · {days}",
+    "today": "Encomenda até às {cutoff} · entregamos hoje entre as {start} e as {end} · {days}",
+    "later": "Encomenda já · entregamos {day}, entre as {start} e as {end}",
+    "tomorrow": "amanhã"
   },
   "Home": {
-    "headline": "Comida feita em casa. <em>Sem a chatice.</em> Que cabe no teu bolso.",
-    "subtitle": "Refeições caseiras, ricas em proteína e sem aditivos, da nossa cozinha para a tua. Pratos e arroz entregues congelados, saladas feitas nessa manhã. Jantar em minutos. Aprovado pelos miúdos.",
-    "comingSoon": "O site está a ser cozinhado. Volta em breve!"
+    "notFilledIn": "A página inicial ainda não tem conteúdo: preenche-a em /admin → Home page (ou corre npm run seed).",
+    "seeMenu": "Ver o menu",
+    "howItWorks": "Como funciona",
+    "perPerson": "por pessoa",
+    "seeFullMenu": "Ver o menu completo →",
+    "ourStory": "A nossa história →",
+    "receipts": {
+      "takeaway": "TAKE-AWAY",
+      "nuvou": "NUVOU",
+      "dividedBy": "÷ {count} pessoas",
+      "perPerson": "/ pessoa"
+    },
+    "macros": {
+      "label": "Distribuição da energia",
+      "protein": "Proteína",
+      "carbs": "Hidratos",
+      "fat": "Gorduras",
+      "example": "Exemplo: {name}"
+    },
+    "carbon": {
+      "average": "Refeição média em PT",
+      "ours": "Nuvou"
+    },
+    "delivery": {
+      "fromPerPerson": "Jantar completo desde {price} por pessoa",
+      "sameDay": "Entrega no próprio dia",
+      "schedule": "{days}, {start}–{end}",
+      "freeOver": "Entrega grátis acima de {threshold} (senão, {fee})"
+    }
+  },
+  "Product": {
+    "featured": "Destaque",
+    "from": "desde {price}",
+    "types": { "main": "Prato", "rice": "Arroz", "salad": "Salada" },
+    "sizesShort": { "small": "P", "medium": "M", "large": "G" }
+  },
+  "Footer": {
+    "tagline": "Boa vida na comida",
+    "questions": "Dúvidas?",
+    "instagram": "Instagram"
   }
 }

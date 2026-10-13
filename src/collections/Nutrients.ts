@@ -1,6 +1,7 @@
 import { slugField, type CollectionConfig } from 'payload'
 
 import { anyone, isAdmin } from '@/access'
+import { revalidateHooks } from '@/hooks/revalidateSite'
 import { slugify } from '@/lib/slugify'
 
 // Notable nutrients (iron, vitamin C, omega-3…), maintained once. Recipes tick
@@ -15,6 +16,7 @@ export const Nutrients: CollectionConfig = {
     group: 'Ingredients & nutrition',
   },
   access: { read: anyone, create: isAdmin, update: isAdmin, delete: isAdmin },
+  hooks: revalidateHooks,
   defaultSort: 'name',
   fields: [
     { name: 'name', type: 'text', localized: true, required: true, admin: { description: 'e.g. "Ferro" / "Iron"' } },

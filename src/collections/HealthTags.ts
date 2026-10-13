@@ -1,6 +1,7 @@
 import { slugField, type CollectionConfig } from 'payload'
 
 import { anyone, isAdmin } from '@/access'
+import { revalidateHooks } from '@/hooks/revalidateSite'
 import { slugify } from '@/lib/slugify'
 
 // "Good for" tags shown on product pages, e.g. "Ossos fortes". Not ticked on
@@ -15,6 +16,7 @@ export const HealthTags: CollectionConfig = {
     group: 'Ingredients & nutrition',
   },
   access: { read: anyone, create: isAdmin, update: isAdmin, delete: isAdmin },
+  hooks: revalidateHooks,
   fields: [
     { name: 'name', type: 'text', localized: true, required: true, admin: { description: 'e.g. "Ossos fortes" / "Strong bones"' } },
     {

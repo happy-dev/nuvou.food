@@ -1,44 +1,66 @@
-import { useTranslations } from 'next-intl'
-import { setRequestLocale } from 'next-intl/server'
-import Image from 'next/image'
-import { use } from 'react'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 
-import { Link } from '@/i18n/navigation'
+import { Cheaper } from '@/components/home/Cheaper'
+import { FinalCall } from '@/components/home/FinalCall'
+import { Hero } from '@/components/home/Hero'
+import { HowItWorks } from '@/components/home/HowItWorks'
+import { MostOrdered } from '@/components/home/MostOrdered'
+import { Faster, Healthy, KidApproved, Planet } from '@/components/home/Promises'
+import { Story } from '@/components/home/Story'
+import { Testimonials } from '@/components/home/Testimonials'
+import { getHealthTags, getHomePage, getRecipes, getSiteSettings } from '@/data/site'
+import type { Locale } from '@/lib/format'
+import { inferHealthTags } from '@/lib/healthTags'
+import { fromPriceInCents, mostOrdered } from '@/lib/menu'
+import { toCopyValues, toPricingSettings } from '@/lib/settings'
 
-// Temporary page for PR 1 (foundation): checks fonts, colours, languages and logo.
-// The real Home page arrives in PR 3.
-export default function HomePage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = use(params)
+// Home page. The copy and images come from /admin → Home page; prices, delivery
+// times and products from Site settings and Recipes. Pre-rendered, and rebuilt
+// when that content changes (src/hooks/revalidateSite.ts).
+export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
+  const locale = (await params).locale as Locale
   setRequestLocale(locale)
 
-  const t = useTranslations('Home')
-  const nav = useTranslations('Nav')
-  const otherLocale = locale === 'pt' ? 'en' : 'pt'
+  const [home, settings, recipes, tags] = await Promise.all([
+    getHomePage(locale),
+    getSiteSettings(locale),
+    getRecipes(locale),
+    getHealthTags(locale),
+  ])
+
+  if (!home.hero?.headline) {
+    const t = await getTranslations('Home')
+    return <main className="wrap py-24">{t('notFilledIn')}</main>
+  }
+
+  const values = toCopyValues(settings, locale)
+  const pricing = toPricingSettings(settings)
+  // Until orders exist (Phase 5), "most ordered" means featured first, then the rest.
+  const products = mostOrdered(recipes, { limit: 4 })
+  // The nutrition visual uses a real recipe: the first shown that has nutrition figures.
+  const example = products.find((r) => r.nutrition?.protein != null)
 
   return (
-    <main className="min-h-dvh bg-rosa p-4 sm:p-8">
-      <div className="mx-auto max-w-2xl rounded-card bg-marrom p-8 text-rosa sm:p-10">
-        <Image
-          src="/brand/nuvou-logo-rosa.jpg"
-          alt="Nuvou: Boa vida na comida"
-          width={200}
-          height={200}
-          priority
-          className="-ml-6 -mt-5 mb-2 size-36 rounded-card object-cover sm:size-48"
-        />
-        <h1 className="text-5xl leading-[0.92] sm:text-7xl">
-          {t.rich('headline', { em: (chunks) => <em>{chunks}</em> })}
-        </h1>
-        <p className="mt-5 max-w-prose text-lg leading-snug">{t('subtitle')}</p>
-        <p className="mt-8 inline-block rounded-full bg-laranja px-6 py-3 font-bold text-branco">
-          {t('comingSoon')}
-        </p>
-        <p className="mt-8 text-sm">
-          <Link href="/" locale={otherLocale} className="font-bold underline">
-            {nav('switchLanguage')}
-          </Link>
-        </p>
-      </div>
+    <main>
+      <Hero content={home.hero} values={values} />
+      <HowItWorks content={home.howItWorks} values={values} />
+      <Faster content={home.faster} values={values} />
+      <Cheaper content={home.cheaper} values={values} pricing={pricing} />
+      <KidApproved content={home.kids} values={values} />
+      <Healthy
+        content={home.healthy}
+        values={values}
+        example={example && { recipe: example, tags: inferHealthTags(example.notableNutrients, tags) }}
+      />
+      <Planet content={home.planet} values={values} />
+      <MostOrdered
+        content={home.mostOrdered}
+        values={values}
+        products={products.map((recipe) => ({ recipe, fromPrice: fromPriceInCents(recipe, pricing) }))}
+      />
+      <Story content={home.story} values={values} />
+      <Testimonials content={home.testimonials} values={values} />
+      <FinalCall content={home.finalCall} values={values} />
     </main>
   )
 }
