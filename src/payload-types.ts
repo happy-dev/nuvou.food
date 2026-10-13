@@ -884,18 +884,18 @@ export interface HomePage {
     items?:
       | {
           /**
-           * In the language it was said; the other language version shows the translation.
+           * Optional, square. A child’s photo needs a parent’s consent.
            */
-          quote: string;
+          photo?: (number | null) | Media;
           name: string;
           /**
            * Optional, e.g. "9 anos". For a child: first name and age only.
            */
           detail?: string | null;
           /**
-           * Optional, square. A child’s photo needs a parent’s consent.
+           * In the language it was said; the other language version shows the translation.
            */
-          photo?: (number | null) | Media;
+          quote: string;
           id?: string | null;
         }[]
       | null;
@@ -1071,10 +1071,10 @@ export interface HomePageSelect<T extends boolean = true> {
         items?:
           | T
           | {
-              quote?: T;
+              photo?: T;
               name?: T;
               detail?: T;
-              photo?: T;
+              quote?: T;
               id?: T;
             };
       };

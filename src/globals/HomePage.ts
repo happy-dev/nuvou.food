@@ -180,11 +180,7 @@ export const HomePage: GlobalConfig = {
               type: 'array',
               labels: { singular: 'Testimonial', plural: 'Testimonials' },
               fields: [
-                copyField({
-                  name: 'quote',
-                  long: true,
-                  description: 'In the language it was said; the other language version shows the translation.',
-                }),
+                image('photo', 'Optional, square. A child’s photo needs a parent’s consent.'),
                 {
                   type: 'row',
                   fields: [
@@ -197,7 +193,11 @@ export const HomePage: GlobalConfig = {
                     },
                   ],
                 },
-                image('photo', 'Optional, square. A child’s photo needs a parent’s consent.'),
+                copyField({
+                  name: 'quote',
+                  long: true,
+                  description: 'In the language it was said; the other language version shows the translation.',
+                }),
               ],
             },
           ],

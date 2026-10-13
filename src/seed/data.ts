@@ -260,12 +260,12 @@ export type HomeImageKey = keyof typeof homeImages
 // Home page copy (inputs/notes/COPY.md, Part 2). Markup: *highlight*,
 // **bold**, {placeholders} (src/lib/copy.ts). Images are set by the seed.
 // Tomé is a minor: first name only. His photo is shown with his mother Vivi's consent.
-const testimonials = (quotes: [string, string, string]) =>
+const testimonials = (quotes: [string, string, string], details: [string, string, string]) =>
   [
-    { quote: quotes[0], name: 'Tomé', photo: 'tome' },
-    { quote: quotes[1], name: 'Bibiana de Sá', photo: 'bibiana' },
-    { quote: quotes[2], name: 'António Nozes', photo: 'antonio' },
-  ] as { quote: string; name: string; photo: HomeImageKey | null }[]
+    { quote: quotes[0], name: 'Tomé', detail: details[0], photo: 'tome' },
+    { quote: quotes[1], name: 'Bibiana de Sá', detail: details[1], photo: 'bibiana' },
+    { quote: quotes[2], name: 'António Nozes', detail: details[2], photo: 'antonio' },
+  ] as { quote: string; name: string; detail: string; photo: HomeImageKey | null }[]
 
 // No delivery fee on the takeaway side: our per-person price leaves delivery
 // out too (free over the threshold, one delivery covers several dinners).
@@ -341,7 +341,7 @@ export const homePage = {
         'Os meus amigos da escola gostam tanto da nossa comida que eles me pagam bebidas em troca de um bocado dela.',
         'Melhor húmus da minha vida.',
         'Eu amo o húmus e os Dahl mesmo!',
-      ]),
+      ], ['13 anos', 'Semeadora de cultura', 'Escalador apaixonado']),
     },
     finalCall: {
       title: 'Hoje à noite, *o jantar já está feito.*',
@@ -416,7 +416,7 @@ export const homePage = {
         'My friends from school like our food so much that they buy me drinks in exchange for some of it.',
         'Best hummus of my life.',
         'I really love the hummus and the dahl!',
-      ]),
+      ], ['13 years old', 'Sower of culture', 'Passionate climber']),
     },
     finalCall: {
       title: "Tonight, *dinner's already done.*",
